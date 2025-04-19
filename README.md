@@ -111,10 +111,6 @@ This game follows the 42 School Norm, which includes specific coding standards:
 - Player profiles and high scores
 - Wave system with increasing difficulty
 
-## License
-
-This project is available under the MIT License - see the LICENSE file for details.
-
 ## Credits
 
-Developed by [Your Name] as a project for 42 School.
+Developed by Jynra.
