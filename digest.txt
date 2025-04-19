@@ -1,0 +1,1774 @@
+Directory structure:
+└── Versus_TD/
+    ├── README.md
+    ├── Makefile
+    ├── includes/
+    │   ├── config.h
+    │   ├── game.h
+    │   ├── types.h
+    │   └── utils.h
+    └── srcs/
+        ├── entities.c
+        ├── init.c
+        ├── input.c
+        ├── main.c
+        ├── render.c
+        ├── update.c
+        └── utils.c
+
+================================================
+File: README.md
+================================================
+# Versus_TD
+A simple tower defense game in C
+
+
+
+================================================
+File: Makefile
+================================================
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/04/19 15:56:12 by student           #+#    #+#              #
+#    Updated: 2025/04/19 02:17:09 by ellucas          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+# Nom du programme
+NAME = versus_td
+
+# Compilateur et options
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -Iincludes
+LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lm
+
+# Répertoires
+SRC_DIR = srcs
+INC_DIR = includes
+OBJ_DIR = objs
+
+# Fichiers source et objets
+SRCS = srcs/entities.c \
+       srcs/init.c \
+       srcs/input.c \
+       srcs/main.c \
+       srcs/render.c \
+       srcs/update.c \
+       srcs/utils.c
+
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
+# Règle par défaut
+all: $(NAME)
+
+# Création du répertoire des objets
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+# Règle pour générer l'exécutable
+$(NAME): $(OBJ_DIR) $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+
+# Règle pour compiler chaque fichier source en objet
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Nettoyage
+clean:
+	rm -rf $(OBJ_DIR)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
+
+
+================================================
+File: includes/config.h
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   config.h                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 01:35:35 by ellucas           #+#    #+#             */
+/*   Updated: 2025/04/19 01:35:36 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef CONFIG_H
+# define CONFIG_H
+
+/* Window and performance constants */
+# define WINDOW_WIDTH 800
+# define WINDOW_HEIGHT 680
+# define FPS 60
+# define FRAME_DELAY (1000 / FPS)
+
+/* Interface constants */
+# define TOOLBAR_HEIGHT 80
+# define GAME_AREA_HEIGHT (WINDOW_HEIGHT - TOOLBAR_HEIGHT)
+# define TOWER_BUTTON_SIZE 60
+# define TOWER_BUTTON_PADDING 10
+# define MAX_TOWER_TYPES 3
+
+/* Entity limits */
+# define MAX_TOWERS 50
+# define MAX_ENEMIES 100
+# define MAX_PROJECTILES 200
+
+/* Grid constants */
+# define GRID_SIZE 40
+# define GRID_COLS (WINDOW_WIDTH / GRID_SIZE)
+# define GRID_ROWS (GAME_AREA_HEIGHT / GRID_SIZE)
+
+/* Tower types */
+# define TOWER_TYPE_BASIC 1
+# define TOWER_TYPE_SLOW 2
+# define TOWER_TYPE_MULTI 3
+
+/* Terrain types */
+# define TERRAIN_PATH 0
+# define TERRAIN_BUILDABLE 1
+# define TERRAIN_OCCUPIED 2
+
+/* Tower costs */
+# define COST_TOWER_BASIC 20
+# define COST_TOWER_SLOW 40
+# define COST_TOWER_MULTI 60
+
+/* Tower stats - basic tower */
+# define TOWER_BASIC_DAMAGE 20
+# define TOWER_BASIC_RANGE 100.0f
+# define TOWER_BASIC_RATE 1.0f
+
+/* Tower stats - slow tower */
+# define TOWER_SLOW_DAMAGE 10
+# define TOWER_SLOW_RANGE 120.0f
+# define TOWER_SLOW_RATE 0.8f
+# define TOWER_SLOW_EFFECT 0.5f
+# define TOWER_SLOW_DURATION 3.0f
+
+/* Tower stats - multi tower */
+# define TOWER_MULTI_DAMAGE 15
+# define TOWER_MULTI_RANGE 150.0f
+# define TOWER_MULTI_RATE 0.7f
+# define TOWER_MULTI_TARGETS 2
+
+/* Enemy stats */
+# define ENEMY_BASIC_HEALTH 100
+# define ENEMY_BASIC_SPEED 1.0f
+# define ENEMY_REWARD 10
+# define ENEMY_SCORE 100
+
+/* Projectile stats */
+# define PROJECTILE_SPEED 5.0f
+
+/* Game parameters */
+# define STARTING_MONEY 100
+# define STARTING_LIVES 20
+
+#endif
+
+
+================================================
+File: includes/game.h
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   game.h                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 15:30:42 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:22:07 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef GAME_H
+# define GAME_H
+
+# include <SDL2/SDL.h>
+# include <SDL2/SDL_image.h>
+# include <SDL2/SDL_ttf.h>
+# include <stdbool.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <math.h>
+
+# include "config.h"
+# include "types.h"
+# include "utils.h"
+
+/* Initialization and cleanup functions */
+bool	init_sdl(t_game *game);
+void	cleanup_sdl(t_game *game);
+void	init_game(t_game *game);
+void	reset_game(t_game *game);
+void	init_tower_buttons(t_game *game);
+void	init_restart_button(t_game *game);
+bool	init_fonts(t_game *game);
+
+/* Interface functions */
+void	render_toolbar(t_game *game);
+void	render_game_area(t_game *game);
+bool	point_in_rect(int x, int y, SDL_Rect rect);
+
+/* Main game functions */
+void	handle_events(t_game *game);
+void	update(t_game *game);
+void	render(t_game *game);
+
+/* Entity management functions */
+void	spawn_enemy(t_game *game);
+void	place_tower(t_game *game, int grid_x, int grid_y);
+void	update_towers(t_game *game);
+void	update_enemies(t_game *game);
+void	update_projectiles(t_game *game);
+
+/* Color helpers */
+SDL_Color	get_white_color(void);
+SDL_Color	get_black_color(void);
+SDL_Color	get_red_color(void);
+SDL_Color	get_green_color(void);
+
+#endif
+
+
+================================================
+File: includes/types.h
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   types.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 15:30:42 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:17:44 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef TYPES_H
+# define TYPES_H
+
+# include <SDL2/SDL.h>
+# include <SDL2/SDL_image.h>
+# include <SDL2/SDL_ttf.h>
+# include <stdbool.h>
+
+/* États du jeu */
+typedef enum e_game_state
+{
+	STATE_PLAYING,
+	STATE_GAME_OVER
+}	t_game_state;
+
+/* Path point structure for enemy path */
+typedef struct s_path_point
+{
+	int	x;
+	int	y;
+}	t_path_point;
+
+/* Enemy structure */
+typedef struct s_enemy
+{
+	float		x;
+	float		y;
+	int			width;
+	int			height;
+	float		speed;
+	float		base_speed;
+	int			health;
+	int			max_health;
+	int			path_index;
+	bool		active;
+	SDL_Texture	*texture;
+	bool		slowed;
+	float		slow_timer;
+}	t_enemy;
+
+/* Tower structure */
+typedef struct s_tower
+{
+	float		x;
+	float		y;
+	int			width;
+	int			height;
+	int			cost;
+	int			damage;
+	float		range;
+	float		fire_rate;
+	float		fire_timer;
+	bool		active;
+	SDL_Texture	*texture;
+}	t_tower;
+
+/* Projectile structure */
+typedef struct s_projectile
+{
+	float		x;
+	float		y;
+	float		dx;
+	float		dy;
+	int			damage;
+	float		speed;
+	bool		active;
+	SDL_Texture	*texture;
+}	t_projectile;
+
+/* Tower selection button structure */
+typedef struct s_tower_button
+{
+	SDL_Rect	rect;
+	int			tower_type;
+	SDL_Texture	*texture;
+	char		*description;
+	int			cost;
+}	t_tower_button;
+
+/* Main game structure */
+typedef struct s_game
+{
+	SDL_Window		*window;
+	SDL_Renderer	*renderer;
+	bool			is_running;
+	t_game_state	state;
+	int				money;
+	int				lives;
+	int				score;
+	int				round;
+	int				grid[GRID_ROWS][GRID_COLS];
+	t_enemy			enemies[MAX_ENEMIES];
+	t_tower			towers[MAX_TOWERS];
+	t_projectile	projectiles[MAX_PROJECTILES];
+	t_path_point	path[20];
+	int				path_length;
+	SDL_Texture		*tower_texture;
+	SDL_Texture		*enemy_texture;
+	SDL_Texture		*projectile_texture;
+	SDL_Texture		*background_texture;
+	int				selected_tower_type;
+	bool			placing_tower;
+	t_tower_button	tower_buttons[MAX_TOWER_TYPES];
+	/* Bouton de redémarrage pour l'écran de Game Over */
+	SDL_Rect		restart_button;
+	/* Polices pour le texte */
+	TTF_Font		*font_small;
+	TTF_Font		*font_medium;
+	TTF_Font		*font_large;
+}	t_game;
+
+#endif
+
+
+================================================
+File: includes/utils.h
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 15:30:42 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:18:41 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef UTILS_H
+# define UTILS_H
+
+# include <SDL2/SDL.h>
+# include <SDL2/SDL_ttf.h>
+
+typedef struct s_game t_game;
+
+/* Calculate distance between two points */
+float	distance(float x1, float y1, float x2, float y2);
+
+/* Render text using SDL_ttf */
+void	render_text(t_game *game, char *text, TTF_Font *font,
+			SDL_Rect dest, SDL_Color color);
+
+#endif
+
+
+================================================
+File: srcs/entities.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   entities.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 16:05:42 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:12:06 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/game.h"
+
+/* Prototypes des fonctions auxiliaires */
+void	set_tower_properties(t_game *game, t_tower *tower, int grid_x, int grid_y,
+			int tower_cost);
+void	shift_targets(int *target_indices, float *target_distances,
+			int insert_index, int targets_found);
+void	shift_targets_insert(int *target_indices, float *target_distances,
+			int insert_index, int targets_to_find);
+void	find_targets(t_game *game, t_tower *tower, int targets_to_find,
+			int *target_indices);
+void	fire_at_target(t_game *game, t_tower *tower, int target_index);
+
+void	spawn_enemy(t_game *game)
+{
+	int	i;
+
+	i = 0;
+	while (i < MAX_ENEMIES)
+	{
+		if (!game->enemies[i].active)
+		{
+			game->enemies[i].active = true;
+			game->enemies[i].x = game->path[0].x;
+			game->enemies[i].y = game->path[0].y;
+			game->enemies[i].width = 30;
+			game->enemies[i].height = 30;
+			game->enemies[i].base_speed = ENEMY_BASIC_SPEED;
+			game->enemies[i].speed = ENEMY_BASIC_SPEED;
+			game->enemies[i].health = ENEMY_BASIC_HEALTH;
+			game->enemies[i].max_health = ENEMY_BASIC_HEALTH;
+			game->enemies[i].path_index = 0;
+			game->enemies[i].slowed = false;
+			game->enemies[i].slow_timer = 0.0f;
+			break ;
+		}
+		i++;
+	}
+}
+
+void	set_tower_properties(t_game *game, t_tower *tower, int grid_x, int grid_y,
+		int tower_cost)
+{
+	tower->active = true;
+	tower->x = grid_x * GRID_SIZE + GRID_SIZE / 2;
+	tower->y = grid_y * GRID_SIZE + GRID_SIZE / 2;
+	tower->width = 30;
+	tower->height = 30;
+	tower->cost = tower_cost;
+	if (game->selected_tower_type == TOWER_TYPE_BASIC)
+	{
+		tower->damage = TOWER_BASIC_DAMAGE;
+		tower->range = TOWER_BASIC_RANGE;
+		tower->fire_rate = TOWER_BASIC_RATE;
+	}
+	else if (game->selected_tower_type == TOWER_TYPE_SLOW)
+	{
+		tower->damage = TOWER_SLOW_DAMAGE;
+		tower->range = TOWER_SLOW_RANGE;
+		tower->fire_rate = TOWER_SLOW_RATE;
+	}
+	else if (game->selected_tower_type == TOWER_TYPE_MULTI)
+	{
+		tower->damage = TOWER_MULTI_DAMAGE;
+		tower->range = TOWER_MULTI_RANGE;
+		tower->fire_rate = TOWER_MULTI_RATE;
+	}
+	tower->fire_timer = 0.0f;
+}
+
+void	place_tower(t_game *game, int grid_x, int grid_y)
+{
+	int	tower_cost;
+	int	i;
+
+	if (grid_x < 0 || grid_x >= GRID_COLS || grid_y < 0 || grid_y >= GRID_ROWS)
+		return ;
+	if (game->grid[grid_y][grid_x] != TERRAIN_BUILDABLE)
+		return ;
+	tower_cost = 0;
+	if (game->selected_tower_type == TOWER_TYPE_BASIC)
+		tower_cost = COST_TOWER_BASIC;
+	else if (game->selected_tower_type == TOWER_TYPE_SLOW)
+		tower_cost = COST_TOWER_SLOW;
+	else if (game->selected_tower_type == TOWER_TYPE_MULTI)
+		tower_cost = COST_TOWER_MULTI;
+	else
+		return ;
+	if (game->money < tower_cost)
+		return ;
+	i = 0;
+	while (i < MAX_TOWERS)
+	{
+		if (!game->towers[i].active)
+		{
+			set_tower_properties(game, &game->towers[i], grid_x, grid_y, tower_cost);
+			game->money -= tower_cost;
+			game->grid[grid_y][grid_x] = TERRAIN_OCCUPIED;
+			break ;
+		}
+		i++;
+	}
+}
+
+void	shift_targets(int *target_indices, float *target_distances,
+		int insert_index, int targets_found)
+{
+	int	k;
+
+	k = targets_found - 1;
+	while (k >= insert_index)
+	{
+		target_indices[k + 1] = target_indices[k];
+		target_distances[k + 1] = target_distances[k];
+		k--;
+	}
+}
+
+void	shift_targets_insert(int *target_indices, float *target_distances,
+		int insert_index, int targets_to_find)
+{
+	int	k;
+
+	k = targets_to_find - 1;
+	while (k > insert_index)
+	{
+		target_indices[k] = target_indices[k - 1];
+		target_distances[k] = target_distances[k - 1];
+		k--;
+	}
+}
+
+void	find_targets(t_game *game, t_tower *tower, int targets_to_find,
+		int *target_indices)
+{
+	int		i;
+	int		j;
+	int		insert_index;
+	float	dist;
+	float	target_distances[TOWER_MULTI_TARGETS];
+	int		targets_found;
+
+	targets_found = 0;
+	i = 0;
+	while (i < TOWER_MULTI_TARGETS)
+	{
+		target_indices[i] = -1;
+		target_distances[i] = 0;
+		i++;
+	}
+	j = 0;
+	while (j < MAX_ENEMIES)
+	{
+		if (game->enemies[j].active)
+		{
+			dist = distance(tower->x, tower->y,
+					game->enemies[j].x, game->enemies[j].y);
+			if (dist < tower->range)
+			{
+				insert_index = targets_found;
+				while (insert_index > 0 && dist < target_distances[insert_index - 1])
+					insert_index--;
+				if (insert_index < targets_found && targets_found < targets_to_find)
+					shift_targets(target_indices, target_distances, insert_index,
+							targets_found);
+				if (targets_found < targets_to_find)
+				{
+					target_indices[insert_index] = j;
+					target_distances[insert_index] = dist;
+					targets_found++;
+				}
+				else if (insert_index < targets_to_find)
+				{
+					shift_targets_insert(target_indices, target_distances,
+							insert_index, targets_to_find);
+					target_indices[insert_index] = j;
+					target_distances[insert_index] = dist;
+				}
+			}
+		}
+		j++;
+	}
+}
+
+void	fire_at_target(t_game *game, t_tower *tower, int target_index)
+{
+	int		j;
+	float	dx;
+	float	dy;
+	float	length;
+
+	j = 0;
+	while (j < MAX_PROJECTILES)
+	{
+		if (!game->projectiles[j].active)
+		{
+			game->projectiles[j].active = true;
+			game->projectiles[j].x = tower->x;
+			game->projectiles[j].y = tower->y;
+			game->projectiles[j].damage = tower->damage;
+			game->projectiles[j].speed = PROJECTILE_SPEED;
+			dx = game->enemies[target_index].x - tower->x;
+			dy = game->enemies[target_index].y - tower->y;
+			length = sqrt(dx * dx + dy * dy);
+			game->projectiles[j].dx = dx / length * game->projectiles[j].speed;
+			game->projectiles[j].dy = dy / length * game->projectiles[j].speed;
+			break ;
+		}
+		j++;
+	}
+}
+
+void	update_towers(t_game *game)
+{
+	int	i;
+	int	targets_to_find;
+	int	target_indices[TOWER_MULTI_TARGETS];
+	int	t;
+	int	targets_found;
+
+	i = 0;
+	while (i < MAX_TOWERS)
+	{
+		if (game->towers[i].active)
+		{
+			game->towers[i].fire_timer += 1.0f / FPS;
+			if (game->towers[i].fire_timer >= 1.0f / game->towers[i].fire_rate)
+			{
+				targets_to_find = 1;
+				if (game->towers[i].damage == TOWER_MULTI_DAMAGE)
+					targets_to_find = TOWER_MULTI_TARGETS;
+				find_targets(game, &game->towers[i], targets_to_find, target_indices);
+				targets_found = 0;
+				t = 0;
+				while (t < targets_to_find && target_indices[t] != -1)
+				{
+					fire_at_target(game, &game->towers[i], target_indices[t]);
+					targets_found++;
+					t++;
+				}
+				if (targets_found > 0)
+					game->towers[i].fire_timer = 0.0f;
+			}
+		}
+		i++;
+	}
+}
+
+void	update_enemies(t_game *game)
+{
+	int		i;
+	float	target_x;
+	float	target_y;
+	float	dx;
+	float	dy;
+	float	length;
+
+	i = 0;
+	while (i < MAX_ENEMIES)
+	{
+		if (game->enemies[i].active)
+		{
+			if (game->enemies[i].slowed)
+			{
+				game->enemies[i].slow_timer -= 1.0f / FPS;
+				if (game->enemies[i].slow_timer <= 0)
+				{
+					game->enemies[i].slowed = false;
+					game->enemies[i].speed = game->enemies[i].base_speed;
+				}
+			}
+			target_x = game->path[game->enemies[i].path_index + 1].x;
+			target_y = game->path[game->enemies[i].path_index + 1].y;
+			dx = target_x - game->enemies[i].x;
+			dy = target_y - game->enemies[i].y;
+			length = sqrt(dx * dx + dy * dy);
+			if (length < game->enemies[i].speed)
+			{
+				game->enemies[i].path_index++;
+				if (game->enemies[i].path_index >= game->path_length - 1)
+				{
+					game->enemies[i].active = false;
+					game->lives--;
+					if (game->lives <= 0)
+						printf("Game Over!\n");
+				}
+			}
+			else
+			{
+				game->enemies[i].x += dx / length * game->enemies[i].speed;
+				game->enemies[i].y += dy / length * game->enemies[i].speed;
+			}
+			if (game->enemies[i].health <= 0)
+			{
+				game->enemies[i].active = false;
+				game->money += ENEMY_REWARD;
+				game->score += ENEMY_SCORE;
+			}
+		}
+		i++;
+	}
+}
+
+void	update_projectiles(t_game *game)
+{
+	int		i;
+	int		j;
+	float	dist;
+
+	i = 0;
+	while (i < MAX_PROJECTILES)
+	{
+		if (game->projectiles[i].active)
+		{
+			game->projectiles[i].x += game->projectiles[i].dx;
+			game->projectiles[i].y += game->projectiles[i].dy;
+			if (game->projectiles[i].x < 0 || game->projectiles[i].x > WINDOW_WIDTH
+				|| game->projectiles[i].y < 0
+				|| game->projectiles[i].y > WINDOW_HEIGHT)
+			{
+				game->projectiles[i].active = false;
+				i++;
+				continue ;
+			}
+			j = 0;
+			while (j < MAX_ENEMIES)
+			{
+				if (game->enemies[j].active)
+				{
+					dist = distance(
+							game->projectiles[i].x, game->projectiles[i].y,
+							game->enemies[j].x, game->enemies[j].y);
+					if (dist < game->enemies[j].width / 2)
+					{
+						game->enemies[j].health -= game->projectiles[i].damage;
+						if (game->projectiles[i].damage == TOWER_SLOW_DAMAGE)
+						{
+							game->enemies[j].slowed = true;
+							game->enemies[j].slow_timer = TOWER_SLOW_DURATION;
+							game->enemies[j].speed = game->enemies[j].base_speed
+								* TOWER_SLOW_EFFECT;
+						}
+						game->projectiles[i].active = false;
+						break ;
+					}
+				}
+				j++;
+			}
+		}
+		i++;
+	}
+}
+
+
+================================================
+File: srcs/init.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 16:35:12 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:21:38 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/game.h"
+
+bool	init_sdl(t_game *game)
+{
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		printf("Erreur d'initialisation SDL: %s\n", SDL_GetError());
+		return (false);
+	}
+	game->window = SDL_CreateWindow("Tower Defense",
+			SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED,
+			WINDOW_WIDTH,
+			WINDOW_HEIGHT,
+			SDL_WINDOW_SHOWN);
+	if (!game->window)
+	{
+		printf("Erreur de création de fenêtre: %s\n", SDL_GetError());
+		return (false);
+	}
+	game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
+	if (!game->renderer)
+	{
+		printf("Erreur de création du renderer: %s\n", SDL_GetError());
+		return (false);
+	}
+	if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
+	{
+		printf("Erreur d'initialisation SDL_image: %s\n", IMG_GetError());
+		return (false);
+	}
+	if (TTF_Init() == -1)
+	{
+		printf("Erreur d'initialisation SDL_ttf: %s\n", TTF_GetError());
+		return (false);
+	}
+	game->tower_texture = NULL;
+	game->enemy_texture = NULL;
+	game->projectile_texture = NULL;
+	game->background_texture = NULL;
+	game->font_small = NULL;
+	game->font_medium = NULL;
+	game->font_large = NULL;
+	return (true);
+}
+
+bool	init_fonts(t_game *game)
+{
+	game->font_small = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12);
+	if (!game->font_small)
+	{
+		printf("Erreur de chargement de la police small: %s\n", TTF_GetError());
+		return (false);
+	}
+	game->font_medium = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 18);
+	if (!game->font_medium)
+	{
+		printf("Erreur de chargement de la police medium: %s\n", TTF_GetError());
+		return (false);
+	}
+	game->font_large = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24);
+	if (!game->font_large)
+	{
+		printf("Erreur de chargement de la police large: %s\n", TTF_GetError());
+		return (false);
+	}
+	return (true);
+}
+
+void	cleanup_sdl(t_game *game)
+{
+	if (game->tower_texture != NULL)
+		SDL_DestroyTexture(game->tower_texture);
+	if (game->enemy_texture != NULL)
+		SDL_DestroyTexture(game->enemy_texture);
+	if (game->projectile_texture != NULL)
+		SDL_DestroyTexture(game->projectile_texture);
+	if (game->background_texture != NULL)
+		SDL_DestroyTexture(game->background_texture);
+	if (game->font_small != NULL)
+		TTF_CloseFont(game->font_small);
+	if (game->font_medium != NULL)
+		TTF_CloseFont(game->font_medium);
+	if (game->font_large != NULL)
+		TTF_CloseFont(game->font_large);
+	if (game->renderer != NULL)
+		SDL_DestroyRenderer(game->renderer);
+	if (game->window != NULL)
+		SDL_DestroyWindow(game->window);
+	TTF_Quit();
+	IMG_Quit();
+	SDL_Quit();
+}
+
+void	init_tower_buttons(t_game *game)
+{
+	int	start_x;
+	int	button_y;
+
+	start_x = (WINDOW_WIDTH - (MAX_TOWER_TYPES
+				* (TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING))) / 2;
+	button_y = GAME_AREA_HEIGHT + (TOOLBAR_HEIGHT - TOWER_BUTTON_SIZE) / 2;
+	game->tower_buttons[0].rect.x = start_x;
+	game->tower_buttons[0].rect.y = button_y;
+	game->tower_buttons[0].rect.w = TOWER_BUTTON_SIZE;
+	game->tower_buttons[0].rect.h = TOWER_BUTTON_SIZE;
+	game->tower_buttons[0].tower_type = TOWER_TYPE_BASIC;
+	game->tower_buttons[0].description = "Tour standard";
+	game->tower_buttons[0].cost = COST_TOWER_BASIC;
+	game->tower_buttons[0].texture = NULL;
+	game->tower_buttons[1].rect.x = start_x + TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING;
+	game->tower_buttons[1].rect.y = button_y;
+	game->tower_buttons[1].rect.w = TOWER_BUTTON_SIZE;
+	game->tower_buttons[1].rect.h = TOWER_BUTTON_SIZE;
+	game->tower_buttons[1].tower_type = TOWER_TYPE_SLOW;
+	game->tower_buttons[1].description = "Tour ralentissante";
+	game->tower_buttons[1].cost = COST_TOWER_SLOW;
+	game->tower_buttons[1].texture = NULL;
+	game->tower_buttons[2].rect.x = start_x + 2 * (TOWER_BUTTON_SIZE
+			+ TOWER_BUTTON_PADDING);
+	game->tower_buttons[2].rect.y = button_y;
+	game->tower_buttons[2].rect.w = TOWER_BUTTON_SIZE;
+	game->tower_buttons[2].rect.h = TOWER_BUTTON_SIZE;
+	game->tower_buttons[2].tower_type = TOWER_TYPE_MULTI;
+	game->tower_buttons[2].description = "Tour multi-cibles";
+	game->tower_buttons[2].cost = COST_TOWER_MULTI;
+	game->tower_buttons[2].texture = NULL;
+}
+
+void	init_restart_button(t_game *game)
+{
+	int	button_width;
+	int	button_height;
+
+	button_width = 200;
+	button_height = 60;
+	game->restart_button.x = (WINDOW_WIDTH - button_width) / 2;
+	game->restart_button.y = (WINDOW_HEIGHT - button_height) / 2 + 100;
+	game->restart_button.w = button_width;
+	game->restart_button.h = button_height;
+}
+
+void	init_game_variables(t_game *game)
+{
+	game->is_running = true;
+	game->state = STATE_PLAYING;
+	game->money = STARTING_MONEY;
+	game->lives = STARTING_LIVES;
+	game->score = 0;
+	game->round = 1;
+	game->selected_tower_type = TOWER_TYPE_BASIC;
+	game->placing_tower = false;
+}
+
+void	init_grid(t_game *game)
+{
+	int	row;
+	int	col;
+
+	row = 0;
+	while (row < GRID_ROWS)
+	{
+		col = 0;
+		while (col < GRID_COLS)
+		{
+			if (row == 5)
+				game->grid[row][col] = TERRAIN_PATH;
+			else
+				game->grid[row][col] = TERRAIN_BUILDABLE;
+			col++;
+		}
+		row++;
+	}
+}
+
+void	init_path(t_game *game)
+{
+	game->path_length = 2;
+	game->path[0].x = 0;
+	game->path[0].y = 5 * GRID_SIZE + GRID_SIZE / 2;
+	game->path[1].x = WINDOW_WIDTH;
+	game->path[1].y = 5 * GRID_SIZE + GRID_SIZE / 2;
+}
+
+void	init_entities(t_game *game)
+{
+	int	i;
+
+	i = 0;
+	while (i < MAX_ENEMIES)
+	{
+		game->enemies[i].active = false;
+		game->enemies[i].texture = NULL;
+		i++;
+	}
+	i = 0;
+	while (i < MAX_TOWERS)
+	{
+		game->towers[i].active = false;
+		game->towers[i].texture = NULL;
+		i++;
+	}
+	i = 0;
+	while (i < MAX_PROJECTILES)
+	{
+		game->projectiles[i].active = false;
+		game->projectiles[i].texture = NULL;
+		i++;
+	}
+}
+
+void	init_game(t_game *game)
+{
+	if (GRID_ROWS * GRID_COLS > 0)
+		printf("grille initialisee avec dimensions: %d x %d\n", GRID_ROWS, GRID_COLS);
+	else
+		fprintf(stderr, "ERROR: Dimensions de grille invalides: %d x %d\n",
+			GRID_ROWS, GRID_COLS);
+	init_game_variables(game);
+	init_grid(game);
+	init_path(game);
+	init_entities(game);
+	init_tower_buttons(game);
+	init_restart_button(game);
+	init_fonts(game);
+}
+
+void	reset_game(t_game *game)
+{
+	init_game_variables(game);
+	init_grid(game);
+	init_entities(game);
+}
+
+
+================================================
+File: srcs/input.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   input.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 16:43:25 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:11:57 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/game.h"
+
+bool	point_in_rect(int x, int y, SDL_Rect rect)
+{
+	return (x >= rect.x && x < rect.x + rect.w
+		&& y >= rect.y && y < rect.y + rect.h);
+}
+
+void	handle_key_press(t_game *game, SDL_KeyboardEvent key_event)
+{
+	if (game->state == STATE_PLAYING)
+	{
+		if (key_event.keysym.sym == SDLK_ESCAPE)
+		{
+			if (game->placing_tower)
+				game->placing_tower = false;
+		}
+		else if (key_event.keysym.sym == SDLK_1)
+		{
+			if (game->money >= COST_TOWER_BASIC)
+			{
+				game->selected_tower_type = TOWER_TYPE_BASIC;
+				game->placing_tower = true;
+			}
+		}
+		else if (key_event.keysym.sym == SDLK_2)
+		{
+			if (game->money >= COST_TOWER_SLOW)
+			{
+				game->selected_tower_type = TOWER_TYPE_SLOW;
+				game->placing_tower = true;
+			}
+		}
+		else if (key_event.keysym.sym == SDLK_3)
+		{
+			if (game->money >= COST_TOWER_MULTI)
+			{
+				game->selected_tower_type = TOWER_TYPE_MULTI;
+				game->placing_tower = true;
+			}
+		}
+		else if (key_event.keysym.sym == SDLK_SPACE)
+			spawn_enemy(game);
+	}
+	else if (game->state == STATE_GAME_OVER)
+	{
+		if (key_event.keysym.sym == SDLK_RETURN)
+		{
+			reset_game(game);
+		}
+	}
+}
+
+void	handle_playing_state_mouse(t_game *game, SDL_MouseButtonEvent button_event)
+{
+	int	mouse_x;
+	int	mouse_y;
+	int	i;
+	int	grid_x;
+	int	grid_y;
+	bool clicked_on_button;
+
+	if (button_event.button != SDL_BUTTON_LEFT)
+		return ;
+	mouse_x = button_event.x;
+	mouse_y = button_event.y;
+	clicked_on_button = false;
+	i = 0;
+	while (i < MAX_TOWER_TYPES)
+	{
+		if (point_in_rect(mouse_x, mouse_y, game->tower_buttons[i].rect))
+		{
+			if (game->money >= game->tower_buttons[i].cost)
+			{
+				game->selected_tower_type = game->tower_buttons[i].tower_type;
+				game->placing_tower = true;
+				clicked_on_button = true;
+			}
+			break ;
+		}
+		i++;
+	}
+	if (!clicked_on_button && game->placing_tower)
+	{
+		if (mouse_y < GAME_AREA_HEIGHT)
+		{
+			grid_x = mouse_x / GRID_SIZE;
+			grid_y = mouse_y / GRID_SIZE;
+			place_tower(game, grid_x, grid_y);
+		}
+	}
+}
+
+void	handle_game_over_state_mouse(t_game *game, SDL_MouseButtonEvent button_event)
+{
+	int	mouse_x;
+	int	mouse_y;
+
+	if (button_event.button != SDL_BUTTON_LEFT)
+		return ;
+	
+	mouse_x = button_event.x;
+	mouse_y = button_event.y;
+	
+	if (point_in_rect(mouse_x, mouse_y, game->restart_button))
+	{
+		reset_game(game);
+	}
+}
+
+void	handle_mouse_button_down(t_game *game, SDL_MouseButtonEvent button_event)
+{
+	if (game->state == STATE_PLAYING)
+		handle_playing_state_mouse(game, button_event);
+	else if (game->state == STATE_GAME_OVER)
+		handle_game_over_state_mouse(game, button_event);
+}
+
+void	handle_events(t_game *game)
+{
+	SDL_Event	event;
+
+	if (!game)
+	{
+		fprintf(stderr, "ERROR: Pointeur de jeu nul dans handle_events\n");
+		return ;
+	}
+	while (SDL_PollEvent(&event))
+	{
+		if (event.type == SDL_QUIT)
+			game->is_running = false;
+		else if (event.type == SDL_KEYDOWN)
+			handle_key_press(game, event.key);
+		else if (event.type == SDL_MOUSEBUTTONDOWN)
+			handle_mouse_button_down(game, event.button);
+		else if (event.type == SDL_MOUSEBUTTONUP
+			&& event.button.button == SDL_BUTTON_RIGHT
+			&& game->state == STATE_PLAYING)
+			game->placing_tower = false;
+	}
+}
+
+
+================================================
+File: srcs/main.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 16:50:15 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 01:41:45 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/game.h"
+
+int	main(void)
+{
+	t_game	game;
+	Uint32	frame_start;
+	int		frame_time;
+
+	if (!init_sdl(&game))
+		return (1);
+	init_game(&game);
+	while (game.is_running)
+	{
+		frame_start = SDL_GetTicks();
+		handle_events(&game);
+		update(&game);
+		render(&game);
+		frame_time = SDL_GetTicks() - frame_start;
+		if (FRAME_DELAY > frame_time)
+			SDL_Delay(FRAME_DELAY - frame_time);
+	}
+	cleanup_sdl(&game);
+	return (0);
+}
+
+
+================================================
+File: srcs/render.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   render.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 16:53:25 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:27:12 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/game.h"
+
+SDL_Color	get_white_color(void)
+{
+	SDL_Color	color;
+
+	color.r = 255;
+	color.g = 255;
+	color.b = 255;
+	color.a = 255;
+	return (color);
+}
+
+SDL_Color	get_black_color(void)
+{
+	SDL_Color	color;
+
+	color.r = 0;
+	color.g = 0;
+	color.b = 0;
+	color.a = 255;
+	return (color);
+}
+
+SDL_Color	get_red_color(void)
+{
+	SDL_Color	color;
+
+	color.r = 255;
+	color.g = 0;
+	color.b = 0;
+	color.a = 255;
+	return (color);
+}
+
+SDL_Color	get_green_color(void)
+{
+	SDL_Color	color;
+
+	color.r = 0;
+	color.g = 255;
+	color.b = 0;
+	color.a = 255;
+	return (color);
+}
+
+void	render_tower_button_text(t_game *game, int i)
+{
+	SDL_Rect	cost_rect;
+	SDL_Rect	name_rect;
+	char		cost_text[20];
+	char		*name_text;
+	SDL_Color	text_color;
+
+	if (game->money >= game->tower_buttons[i].cost)
+		text_color = get_white_color();
+	else
+		text_color = get_red_color();
+	sprintf(cost_text, "%d$", game->tower_buttons[i].cost);
+	cost_rect.x = game->tower_buttons[i].rect.x + 5;
+	cost_rect.y = game->tower_buttons[i].rect.y + game->tower_buttons[i].rect.h - 15;
+	cost_rect.w = 50;
+	cost_rect.h = 15;
+	render_text(game, cost_text, game->font_small, cost_rect, text_color);
+	if (game->tower_buttons[i].tower_type == TOWER_TYPE_BASIC)
+		name_text = "Basic";
+	else if (game->tower_buttons[i].tower_type == TOWER_TYPE_SLOW)
+		name_text = "Slow";
+	else
+		name_text = "Multi";
+	name_rect.x = game->tower_buttons[i].rect.x + 5;
+	name_rect.y = game->tower_buttons[i].rect.y + 2;
+	name_rect.w = 50;
+	name_rect.h = 15;
+	render_text(game, name_text, game->font_small, name_rect, text_color);
+}
+
+void	render_tower_buttons(t_game *game)
+{
+	int			i;
+	SDL_Rect	tower_rect;
+
+	i = 0;
+	while (i < MAX_TOWER_TYPES)
+	{
+		if (game->placing_tower
+			&& game->selected_tower_type == game->tower_buttons[i].tower_type)
+			SDL_SetRenderDrawColor(game->renderer, 150, 150, 200, 255);
+		else if (game->money >= game->tower_buttons[i].cost)
+			SDL_SetRenderDrawColor(game->renderer, 120, 120, 150, 255);
+		else
+			SDL_SetRenderDrawColor(game->renderer, 90, 90, 90, 255);
+		SDL_RenderFillRect(game->renderer, &game->tower_buttons[i].rect);
+		SDL_SetRenderDrawColor(game->renderer, 50, 50, 50, 255);
+		SDL_RenderDrawRect(game->renderer, &game->tower_buttons[i].rect);
+		tower_rect.x = game->tower_buttons[i].rect.x
+			+ game->tower_buttons[i].rect.w / 4;
+		tower_rect.y = game->tower_buttons[i].rect.y
+			+ game->tower_buttons[i].rect.h / 4;
+		tower_rect.w = game->tower_buttons[i].rect.w / 2;
+		tower_rect.h = game->tower_buttons[i].rect.h / 2;
+		if (game->tower_buttons[i].tower_type == TOWER_TYPE_BASIC)
+			SDL_SetRenderDrawColor(game->renderer, 0, 0, 200, 255);
+		else if (game->tower_buttons[i].tower_type == TOWER_TYPE_SLOW)
+			SDL_SetRenderDrawColor(game->renderer, 0, 150, 200, 255);
+		else if (game->tower_buttons[i].tower_type == TOWER_TYPE_MULTI)
+			SDL_SetRenderDrawColor(game->renderer, 200, 0, 200, 255);
+		SDL_RenderFillRect(game->renderer, &tower_rect);
+		render_tower_button_text(game, i);
+		i++;
+	}
+}
+
+void	render_stats(t_game *game)
+{
+	SDL_Rect	money_text_rect;
+	SDL_Rect	lives_text_rect;
+	SDL_Rect	score_text_rect;
+	char		money_text[50];
+	char		lives_text[50];
+	char		score_text[50];
+	SDL_Color	text_color;
+
+	text_color = get_white_color();
+	sprintf(money_text, "Money: %d$", game->money);
+	sprintf(lives_text, "Lives: %d", game->lives);
+	sprintf(score_text, "Score: %d", game->score);
+
+	money_text_rect.x = 20;
+	money_text_rect.y = GAME_AREA_HEIGHT + 20;
+	money_text_rect.w = 100;
+	money_text_rect.h = 20;
+	render_text(game, money_text, game->font_medium, money_text_rect, text_color);
+
+	lives_text_rect.x = WINDOW_WIDTH - 120;
+	lives_text_rect.y = GAME_AREA_HEIGHT + 20;
+	lives_text_rect.w = 100;
+	lives_text_rect.h = 20;
+	render_text(game, lives_text, game->font_medium, lives_text_rect, text_color);
+
+	// Score déplacé sous les vies
+	score_text_rect.x = WINDOW_WIDTH - 120;
+	score_text_rect.y = GAME_AREA_HEIGHT + 45; // Position en dessous de l'affichage des vies
+	score_text_rect.w = 100;
+	score_text_rect.h = 20;
+	render_text(game, score_text, game->font_medium, score_text_rect, text_color);
+}
+
+void	render_toolbar(t_game *game)
+{
+	SDL_Rect	toolbar_rect;
+
+	toolbar_rect.x = 0;
+	toolbar_rect.y = GAME_AREA_HEIGHT;
+	toolbar_rect.w = WINDOW_WIDTH;
+	toolbar_rect.h = TOOLBAR_HEIGHT;
+	SDL_SetRenderDrawColor(game->renderer, 80, 80, 100, 255);
+	SDL_RenderFillRect(game->renderer, &toolbar_rect);
+	render_tower_buttons(game);
+	render_stats(game);
+}
+
+void	render_grid(t_game *game)
+{
+	int			row;
+	int			col;
+	SDL_Rect	rect;
+
+	row = 0;
+	while (row < GRID_ROWS)
+	{
+		col = 0;
+		while (col < GRID_COLS)
+		{
+			rect.x = col * GRID_SIZE;
+			rect.y = row * GRID_SIZE;
+			rect.w = GRID_SIZE;
+			rect.h = GRID_SIZE;
+			if (game->grid[row][col] == TERRAIN_PATH)
+				SDL_SetRenderDrawColor(game->renderer, 200, 200, 100, 255);
+			else if (game->grid[row][col] == TERRAIN_OCCUPIED)
+				SDL_SetRenderDrawColor(game->renderer, 130, 130, 130, 255);
+			else
+				SDL_SetRenderDrawColor(game->renderer, 100, 150, 100, 255);
+			SDL_RenderFillRect(game->renderer, &rect);
+			SDL_SetRenderDrawColor(game->renderer, 50, 50, 50, 255);
+			SDL_RenderDrawRect(game->renderer, &rect);
+			col++;
+		}
+		row++;
+	}
+}
+
+void	render_towers(t_game *game)
+{
+	int			i;
+	SDL_Rect	rect;
+	SDL_Rect	range_rect;
+	int			radius;
+
+	i = 0;
+	while (i < MAX_TOWERS)
+	{
+		if (game->towers[i].active)
+		{
+			rect.x = (int)game->towers[i].x - game->towers[i].width / 2;
+			rect.y = (int)game->towers[i].y - game->towers[i].height / 2;
+			rect.w = game->towers[i].width;
+			rect.h = game->towers[i].height;
+			if (game->towers[i].damage == TOWER_BASIC_DAMAGE)
+				SDL_SetRenderDrawColor(game->renderer, 0, 0, 200, 255);
+			else if (game->towers[i].damage == TOWER_SLOW_DAMAGE)
+				SDL_SetRenderDrawColor(game->renderer, 0, 150, 200, 255);
+			else if (game->towers[i].damage == TOWER_MULTI_DAMAGE)
+				SDL_SetRenderDrawColor(game->renderer, 200, 0, 200, 255);
+			SDL_RenderFillRect(game->renderer, &rect);
+			SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 100);
+			radius = (int)game->towers[i].range;
+			range_rect.x = (int)game->towers[i].x - radius;
+			range_rect.y = (int)game->towers[i].y - radius;
+			range_rect.w = radius * 2;
+			range_rect.h = radius * 2;
+			SDL_RenderDrawRect(game->renderer, &range_rect);
+		}
+		i++;
+	}
+}
+
+void	render_enemies(t_game *game)
+{
+	int			i;
+	SDL_Rect	rect;
+	SDL_Rect	health_rect;
+	int			health_width;
+
+	i = 0;
+	while (i < MAX_ENEMIES)
+	{
+		if (game->enemies[i].active)
+		{
+			rect.x = (int)game->enemies[i].x - game->enemies[i].width / 2;
+			rect.y = (int)game->enemies[i].y - game->enemies[i].height / 2;
+			rect.w = game->enemies[i].width;
+			rect.h = game->enemies[i].height;
+			if (game->enemies[i].slowed)
+				SDL_SetRenderDrawColor(game->renderer, 150, 100, 100, 255);
+			else
+				SDL_SetRenderDrawColor(game->renderer, 200, 0, 0, 255);
+			SDL_RenderFillRect(game->renderer, &rect);
+			health_width = (int)((float)game->enemies[i].health
+					/ game->enemies[i].max_health * game->enemies[i].width);
+			health_rect.x = (int)game->enemies[i].x - game->enemies[i].width / 2;
+			health_rect.y = (int)game->enemies[i].y - game->enemies[i].height / 2 - 5;
+			health_rect.w = health_width;
+			health_rect.h = 3;
+			SDL_SetRenderDrawColor(game->renderer, 0, 200, 0, 255);
+			SDL_RenderFillRect(game->renderer, &health_rect);
+		}
+		i++;
+	}
+}
+
+void	render_projectiles(t_game *game)
+{
+	int			i;
+	SDL_Rect	rect;
+
+	i = 0;
+	while (i < MAX_PROJECTILES)
+	{
+		if (game->projectiles[i].active)
+		{
+			rect.x = (int)game->projectiles[i].x - 2;
+			rect.y = (int)game->projectiles[i].y - 2;
+			rect.w = 4;
+			rect.h = 4;
+			if (game->projectiles[i].damage == TOWER_BASIC_DAMAGE)
+				SDL_SetRenderDrawColor(game->renderer, 255, 255, 0, 255);
+			else if (game->projectiles[i].damage == TOWER_SLOW_DAMAGE)
+				SDL_SetRenderDrawColor(game->renderer, 0, 255, 255, 255);
+			else if (game->projectiles[i].damage == TOWER_MULTI_DAMAGE)
+				SDL_SetRenderDrawColor(game->renderer, 255, 0, 255, 255);
+			else
+				SDL_SetRenderDrawColor(game->renderer, 255, 255, 255, 255);
+			SDL_RenderFillRect(game->renderer, &rect);
+		}
+		i++;
+	}
+}
+
+void	render_tower_preview(t_game *game)
+{
+	int			mouse_x;
+	int			mouse_y;
+	int			grid_x;
+	int			grid_y;
+	bool		valid_placement;
+	int			center_x;
+	int			center_y;
+	SDL_Rect	preview_rect;
+	float		range;
+	SDL_Rect	range_rect;
+
+	if (!game->placing_tower)
+		return ;
+	SDL_GetMouseState(&mouse_x, &mouse_y);
+	if (mouse_y >= GAME_AREA_HEIGHT)
+		return ;
+	grid_x = mouse_x / GRID_SIZE;
+	grid_y = mouse_y / GRID_SIZE;
+	valid_placement = (grid_x >= 0 && grid_x < GRID_COLS
+			&& grid_y >= 0 && grid_y < GRID_ROWS
+			&& game->grid[grid_y][grid_x] == TERRAIN_BUILDABLE);
+	center_x = grid_x * GRID_SIZE + GRID_SIZE / 2;
+	center_y = grid_y * GRID_SIZE + GRID_SIZE / 2;
+	preview_rect.x = center_x - 15;
+	preview_rect.y = center_y - 15;
+	preview_rect.w = 30;
+	preview_rect.h = 30;
+	if (valid_placement)
+	{
+		if (game->selected_tower_type == TOWER_TYPE_BASIC)
+			SDL_SetRenderDrawColor(game->renderer, 0, 0, 200, 180);
+		else if (game->selected_tower_type == TOWER_TYPE_SLOW)
+			SDL_SetRenderDrawColor(game->renderer, 0, 150, 200, 180);
+		else if (game->selected_tower_type == TOWER_TYPE_MULTI)
+			SDL_SetRenderDrawColor(game->renderer, 200, 0, 200, 180);
+	}
+	else
+		SDL_SetRenderDrawColor(game->renderer, 200, 0, 0, 180);
+	SDL_RenderFillRect(game->renderer, &preview_rect);
+	SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 100);
+	range = 0.0f;
+	if (game->selected_tower_type == TOWER_TYPE_BASIC)
+		range = TOWER_BASIC_RANGE;
+	else if (game->selected_tower_type == TOWER_TYPE_SLOW)
+		range = TOWER_SLOW_RANGE;
+	else if (game->selected_tower_type == TOWER_TYPE_MULTI)
+		range = TOWER_MULTI_RANGE;
+	else
+		range = 100.0f;
+	range_rect.x = center_x - (int)range;
+	range_rect.y = center_y - (int)range;
+	range_rect.w = (int)range * 2;
+	range_rect.h = (int)range * 2;
+	SDL_RenderDrawRect(game->renderer, &range_rect);
+}
+
+void	render_game_area(t_game *game)
+{
+	render_grid(game);
+	render_towers(game);
+	render_enemies(game);
+	render_projectiles(game);
+	render_tower_preview(game);
+}
+
+void	render_game_over_screen(t_game *game)
+{
+	SDL_Rect	overlay;
+	SDL_Rect	title_rect;
+	SDL_Rect	score_rect;
+	SDL_Rect	restart_text_rect;
+	SDL_Color	white_color;
+//	SDL_Color	black_color;
+	char		score_text[50];
+
+	white_color = get_white_color();
+//	black_color = get_black_color();
+	
+	// Overlay semi-transparent
+	overlay.x = 0;
+	overlay.y = 0;
+	overlay.w = WINDOW_WIDTH;
+	overlay.h = WINDOW_HEIGHT;
+	SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 200);
+	SDL_RenderFillRect(game->renderer, &overlay);
+
+	// Titre "Game Over"
+	title_rect.x = (WINDOW_WIDTH - 300) / 2;
+	title_rect.y = WINDOW_HEIGHT / 4;
+	title_rect.w = 300;
+	title_rect.h = 60;
+	SDL_SetRenderDrawColor(game->renderer, 150, 0, 0, 255);
+	SDL_RenderFillRect(game->renderer, &title_rect);
+	SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 255);
+	SDL_RenderDrawRect(game->renderer, &title_rect);
+	render_text(game, "GAME OVER", game->font_large, title_rect, white_color);
+
+	// Score final
+	sprintf(score_text, "Score final: %d", game->score);
+	score_rect.x = (WINDOW_WIDTH - 200) / 2;
+	score_rect.y = WINDOW_HEIGHT / 4 + 80;
+	score_rect.w = 200;
+	score_rect.h = 40;
+	SDL_SetRenderDrawColor(game->renderer, 100, 100, 100, 255);
+	SDL_RenderFillRect(game->renderer, &score_rect);
+	SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 255);
+	SDL_RenderDrawRect(game->renderer, &score_rect);
+	render_text(game, score_text, game->font_medium, score_rect, white_color);
+
+	// Bouton Restart
+	SDL_SetRenderDrawColor(game->renderer, 50, 100, 50, 255);
+	SDL_RenderFillRect(game->renderer, &game->restart_button);
+	SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 255);
+	SDL_RenderDrawRect(game->renderer, &game->restart_button);
+	
+	// Texte du bouton
+	restart_text_rect = game->restart_button;
+	render_text(game, "RESTART", game->font_medium, restart_text_rect, white_color);
+}
+
+void	render(t_game *game)
+{
+	SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
+	SDL_RenderClear(game->renderer);
+
+	if (game->state == STATE_PLAYING)
+	{
+		render_game_area(game);
+		render_toolbar(game);
+	}
+	else if (game->state == STATE_GAME_OVER)
+	{
+		render_game_area(game);
+		render_toolbar(game);
+		render_game_over_screen(game);
+	}
+
+	SDL_RenderPresent(game->renderer);
+}
+
+
+================================================
+File: srcs/update.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   update.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 17:10:42 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:10:39 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/game.h"
+
+void	update_playing_state(t_game *game)
+{
+	update_towers(game);
+	update_enemies(game);
+	update_projectiles(game);
+	
+	if (game->lives <= 0)
+	{
+		printf("Game Over! Score final: %d\n", game->score);
+		game->state = STATE_GAME_OVER;
+	}
+}
+
+void	update_game_over_state(t_game *game)
+{
+	/* Pas de mise à jour nécessaire en état Game Over */
+	(void)game;
+}
+
+void	update(t_game *game)
+{
+	if (game->state == STATE_PLAYING)
+		update_playing_state(game);
+	else if (game->state == STATE_GAME_OVER)
+		update_game_over_state(game);
+}
+
+
+================================================
+File: srcs/utils.c
+================================================
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/19 17:12:25 by student           #+#    #+#             */
+/*   Updated: 2025/04/19 02:21:47 by ellucas          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <math.h>
+#include "../includes/game.h"
+
+float	distance(float x1, float y1, float x2, float y2)
+{
+	float	dx;
+	float	dy;
+
+	dx = x2 - x1;
+	dy = y2 - y1;
+	return (sqrt(dx * dx + dy * dy));
+}
+
+void	render_text(t_game *game, char *text, TTF_Font *font,
+	SDL_Rect dest, SDL_Color color)
+{
+	SDL_Surface	*surface;
+	SDL_Texture	*texture;
+
+	if (!font)
+		return ;
+	surface = TTF_RenderText_Blended(font, text, color);
+	if (!surface)
+	{
+		printf("Erreur de rendu du texte: %s\n", TTF_GetError());
+		return ;
+	}
+	texture = SDL_CreateTextureFromSurface(game->renderer, surface);
+	if (!texture)
+	{
+		printf("Erreur de création de texture: %s\n", SDL_GetError());
+		SDL_FreeSurface(surface);
+		return ;
+	}
+	SDL_RenderCopy(game->renderer, texture, NULL, &dest);
+	SDL_DestroyTexture(texture);
+	SDL_FreeSurface(surface);
+}
+
