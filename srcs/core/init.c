@@ -6,11 +6,11 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 16:35:12 by student           #+#    #+#             */
-/*   Updated: 2025/04/19 02:21:38 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 02:25:24 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/game.h"
+#include "../includes/core/game.h"
 
 bool	init_sdl(t_game *game)
 {

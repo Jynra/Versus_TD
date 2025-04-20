@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:30:42 by student           #+#    #+#             */
-/*   Updated: 2025/04/19 02:17:44 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 02:35:08 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,14 @@
 # include <SDL2/SDL_image.h>
 # include <SDL2/SDL_ttf.h>
 # include <stdbool.h>
+# include "config.h"  /* Assurez-vous que config.h est inclus */
 
 /* États du jeu */
 typedef enum e_game_state
 {
 	STATE_PLAYING,
-	STATE_GAME_OVER
+	STATE_GAME_OVER,
+	STATE_PAUSED        /* Ajout d'un état de pause */
 }	t_game_state;
 
 /* Path point structure for enemy path */
@@ -48,6 +50,9 @@ typedef struct s_enemy
 	SDL_Texture	*texture;
 	bool		slowed;
 	float		slow_timer;
+	int         type;       /* Ajout du type d'ennemi */
+	int         reward;     /* Récompense lorsque l'ennemi est vaincu */
+	int         score;      /* Points de score lorsque l'ennemi est vaincu */
 }	t_enemy;
 
 /* Tower structure */
@@ -64,6 +69,7 @@ typedef struct s_tower
 	float		fire_timer;
 	bool		active;
 	SDL_Texture	*texture;
+	int         type;       /* Ajout du type de tour */
 }	t_tower;
 
 /* Projectile structure */
@@ -77,6 +83,7 @@ typedef struct s_projectile
 	float		speed;
 	bool		active;
 	SDL_Texture	*texture;
+	int         source_type; /* Type de la tour qui a tiré ce projectile */
 }	t_projectile;
 
 /* Tower selection button structure */
@@ -119,6 +126,13 @@ typedef struct s_game
 	TTF_Font		*font_small;
 	TTF_Font		*font_medium;
 	TTF_Font		*font_large;
+	/* Nouveau membre pour le temps de jeu */
+	float           game_time;      /* Temps écoulé depuis le début de la partie */
+	/* Bouton de pause */
+	SDL_Rect        pause_button;
+	/* Tableaux pour les ressources - définition à 11 et 3 comme valeurs fixes */
+	SDL_Texture     *textures[11];  /* Pour les 11 textures disponibles */
+	TTF_Font        *fonts[3];      /* Pour les 3 polices disponibles */
 }	t_game;
 
 #endif
