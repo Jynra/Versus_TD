@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 14:05:22 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 02:42:53 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:45:41 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,25 +44,35 @@ void	input_init(t_input_state *input)
  * @param game Pointeur vers la structure du jeu
  * @param input Pointeur vers la structure d'état des entrées
  */
-void	input_update(t_game *game, t_input_state *input)
+void input_update(t_game *game, t_input_state *input)
 {
-	if (!game || !input)
-		return;
-		
-	/* Mise à jour de la position de la souris */
-	SDL_GetMouseState(&input->mouse_x, &input->mouse_y);
-	
-	/* Traitement des entrées selon l'état du jeu */
-	if (game->state == STATE_PLAYING)
-		input_handle_playing_state(game, input);
-	else if (game->state == STATE_GAME_OVER)
-		input_handle_game_over_state(game, input);
-	else if (game->state == STATE_PAUSED)
-		input_handle_paused_state(game, input);
-		
-	/* Gestion de la demande de fermeture */
-	if (input->quit_requested)
-		game->is_running = false;
+    if (!game || !input)
+    {
+        printf("ERROR: Null game or input in input_update\n");
+        return;
+    }
+    
+    /* Mise à jour de la position de la souris */
+    SDL_GetMouseState(&input->mouse_x, &input->mouse_y);
+    
+    /* Traitement des entrées selon l'état du jeu */
+    if (game->state == STATE_PLAYING)
+    {
+        printf("Calling input_handle_playing_state\n");
+        input_handle_playing_state(game, input);
+    }
+    else if (game->state == STATE_GAME_OVER)
+    {
+        input_handle_game_over_state(game, input);
+    }
+    else if (game->state == STATE_PAUSED)
+    {
+        input_handle_paused_state(game, input);
+    }
+        
+    /* Gestion de la demande de fermeture */
+    if (input->quit_requested)
+        game->is_running = false;
 }
 
 /**
@@ -71,47 +81,70 @@ void	input_update(t_game *game, t_input_state *input)
  * @param game Pointeur vers la structure du jeu
  * @param input Pointeur vers la structure d'état des entrées
  */
-void	input_handle_events(t_game *game, t_input_state *input)
+void input_handle_events(t_game *game, t_input_state *input)
 {
-	SDL_Event	event;
-	
-	if (!game || !input)
-		return;
-		
-	while (SDL_PollEvent(&event))
-	{
-		if (event.type == SDL_QUIT)
-			input->quit_requested = true;
-		else if (event.type == SDL_KEYDOWN)
-		{
-			if (event.key.keysym.scancode < SDL_NUM_SCANCODES)
-				input->keys[event.key.keysym.scancode] = true;
-				
-			/* Touche Escape pour mettre en pause ou quitter */
-			if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-			{
-				if (game->state == STATE_PLAYING)
-					game->state = STATE_PAUSED;
-				else if (game->state == STATE_PAUSED)
-					game->state = STATE_PLAYING;
-			}
-		}
-		else if (event.type == SDL_KEYUP)
-		{
-			if (event.key.keysym.scancode < SDL_NUM_SCANCODES)
-				input->keys[event.key.keysym.scancode] = false;
-		}
-		else if (event.type == SDL_MOUSEBUTTONDOWN)
-		{
-			if (event.button.button < 6)
-				input->mouse_buttons[event.button.button] = true;
-		}
-		else if (event.type == SDL_MOUSEBUTTONUP)
-		{
-			if (event.button.button < 6)
-				input->mouse_buttons[event.button.button] = false;
-		}
-	}
+    SDL_Event event;
+    
+    if (!game || !input)
+        return;
+        
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+            case SDL_QUIT:
+                printf("SDL_QUIT received\n");
+                input->quit_requested = true;
+                game->is_running = false;
+                break;
+                
+            case SDL_KEYDOWN:
+                if (event.key.keysym.scancode < SDL_NUM_SCANCODES)
+                    input->keys[event.key.keysym.scancode] = true;
+                    
+                /* Touche Escape pour mettre en pause ou quitter */
+                if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                {
+                    if (game->state == STATE_PLAYING)
+                    {
+                        game->state = STATE_PAUSED;
+                    }
+                    else if (game->state == STATE_PAUSED)
+                    {
+                        game->state = STATE_PLAYING;
+                    }
+                }
+                break;
+                
+            case SDL_KEYUP:
+                if (event.key.keysym.scancode < SDL_NUM_SCANCODES)
+                    input->keys[event.key.keysym.scancode] = false;
+                break;
+                
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button < 6)
+                {
+                    input->mouse_buttons[event.button.button] = true;
+                    printf("Mouse button %d down at (%d, %d)\n", 
+                           event.button.button, event.button.x, event.button.y);
+                }
+                break;
+                
+            case SDL_MOUSEBUTTONUP:
+                if (event.button.button < 6)
+                {
+                    input->mouse_buttons[event.button.button] = false;
+                    printf("Mouse button %d up at (%d, %d)\n", 
+                           event.button.button, event.button.x, event.button.y);
+                }
+                break;
+                
+            case SDL_MOUSEMOTION:
+                input->mouse_x = event.motion.x;
+                input->mouse_y = event.motion.y;
+                break;
+        }
+    }
 }
 
 /**
@@ -120,92 +153,140 @@ void	input_handle_events(t_game *game, t_input_state *input)
  * @param game Pointeur vers la structure du jeu
  * @param input Pointeur vers la structure d'état des entrées
  */
-void	input_handle_playing_state(t_game *game, t_input_state *input)
+void input_handle_playing_state(t_game *game, t_input_state *input)
 {
-	int		grid_x;
-	int		grid_y;
-	int		i;
-	bool	clicked_on_button;
-	
-	/* Gestion des touches du clavier */
-	if (input_is_key_just_pressed(input, SDL_SCANCODE_SPACE))
-		enemy_spawn(game, ENEMY_TYPE_BASIC);
-		
-	if (input_is_key_just_pressed(input, SDL_SCANCODE_1))
-	{
-		if (game->money >= COST_TOWER_BASIC)
-		{
-			game->selected_tower_type = TOWER_TYPE_BASIC;
-			game->placing_tower = true;
-		}
-	}
-	else if (input_is_key_just_pressed(input, SDL_SCANCODE_2))
-	{
-		if (game->money >= COST_TOWER_SLOW)
-		{
-			game->selected_tower_type = TOWER_TYPE_SLOW;
-			game->placing_tower = true;
-		}
-	}
-	else if (input_is_key_just_pressed(input, SDL_SCANCODE_3))
-	{
-		if (game->money >= COST_TOWER_MULTI)
-		{
-			game->selected_tower_type = TOWER_TYPE_MULTI;
-			game->placing_tower = true;
-		}
-	}
-	
-	/* Gestion du clic gauche */
-	if (input_is_mouse_button_just_pressed(input, SDL_BUTTON_LEFT))
-	{
-		/* Vérifier d'abord si un bouton de la barre d'outils a été cliqué */
-		clicked_on_button = false;
-		
-		/* Bouton de pause */
-		if (ui_button_clicked(game->pause_button, input->mouse_x, input->mouse_y))
-		{
-			game->state = STATE_PAUSED;
-			clicked_on_button = true;
-		}
-		
-		/* Boutons de tour */
-		i = 0;
-		while (i < MAX_TOWER_TYPES && !clicked_on_button)
-		{
-			if (ui_button_clicked(game->tower_buttons[i].rect, 
-					input->mouse_x, input->mouse_y))
-			{
-				if (game->money >= game->tower_buttons[i].cost)
-				{
-					game->selected_tower_type = game->tower_buttons[i].tower_type;
-					game->placing_tower = true;
-					clicked_on_button = true;
-				}
-			}
-			i++;
-		}
-		
-		/* Si aucun bouton n'a été cliqué et qu'on est en mode placement de tour */
-		if (!clicked_on_button && game->placing_tower)
-		{
-			if (input->mouse_y < GAME_AREA_HEIGHT)
-			{
-				/* Convertir les coordonnées de la souris en coordonnées de grille */
-				grid_x = input->mouse_x / GRID_SIZE;
-				grid_y = input->mouse_y / GRID_SIZE;
-				
-				/* Placer la tour */
-				tower_place(game, grid_x, grid_y);
-			}
-		}
-	}
-	
-	/* Clic droit pour annuler le placement de tour */
-	if (input_is_mouse_button_just_pressed(input, SDL_BUTTON_RIGHT))
-	{
-		game->placing_tower = false;
-	}
+    int grid_x, grid_y;
+    int i;
+    bool clicked_on_button;
+    
+    printf("Handling playing state input\n");
+    
+    /* Gestion des touches du clavier */
+    if (input_is_key_just_pressed(input, SDL_SCANCODE_SPACE))
+    {
+        printf("SPACE pressed - spawning enemy\n");
+        enemy_spawn(game, ENEMY_TYPE_BASIC);
+    }
+        
+    if (input_is_key_just_pressed(input, SDL_SCANCODE_1))
+    {
+        printf("Key 1 pressed\n");
+        if (game->money >= COST_TOWER_BASIC)
+        {
+            printf("Selecting BASIC tower\n");
+            game->selected_tower_type = TOWER_TYPE_BASIC;
+            game->placing_tower = true;
+        }
+        else
+        {
+            printf("Not enough money for BASIC tower\n");
+        }
+    }
+    else if (input_is_key_just_pressed(input, SDL_SCANCODE_2))
+    {
+        printf("Key 2 pressed\n");
+        if (game->money >= COST_TOWER_SLOW)
+        {
+            printf("Selecting SLOW tower\n");
+            game->selected_tower_type = TOWER_TYPE_SLOW;
+            game->placing_tower = true;
+        }
+        else
+        {
+            printf("Not enough money for SLOW tower\n");
+        }
+    }
+    else if (input_is_key_just_pressed(input, SDL_SCANCODE_3))
+    {
+        printf("Key 3 pressed\n");
+        if (game->money >= COST_TOWER_MULTI)
+        {
+            printf("Selecting MULTI tower\n");
+            game->selected_tower_type = TOWER_TYPE_MULTI;
+            game->placing_tower = true;
+        }
+        else
+        {
+            printf("Not enough money for MULTI tower\n");
+        }
+    }
+    
+    /* Gestion du clic gauche */
+    if (input_is_mouse_button_just_pressed(input, SDL_BUTTON_LEFT))
+    {
+        printf("Left click detected at (%d, %d)\n", input->mouse_x, input->mouse_y);
+        clicked_on_button = false;
+        
+        /* Bouton de pause */
+        if (ui_button_clicked(game->pause_button, input->mouse_x, input->mouse_y))
+        {
+            printf("Pause button clicked\n");
+            game->state = STATE_PAUSED;
+            clicked_on_button = true;
+        }
+        
+        /* Boutons de tour */
+        i = 0;
+        while (i < MAX_TOWER_TYPES && !clicked_on_button)
+        {
+            if (ui_button_clicked(game->tower_buttons[i].rect, 
+                    input->mouse_x, input->mouse_y))
+            {
+                printf("Tower button %d clicked at (%d, %d, %d, %d)\n", i,
+                       game->tower_buttons[i].rect.x, game->tower_buttons[i].rect.y,
+                       game->tower_buttons[i].rect.w, game->tower_buttons[i].rect.h);
+                
+                if (game->money >= game->tower_buttons[i].cost)
+                {
+                    printf("Selecting tower type %d with money %d >= cost %d\n", 
+                           game->tower_buttons[i].tower_type, game->money, 
+                           game->tower_buttons[i].cost);
+                    game->selected_tower_type = game->tower_buttons[i].tower_type;
+                    game->placing_tower = true;
+                    clicked_on_button = true;
+                }
+                else
+                {
+                    printf("Not enough money for tower %d: %d < %d\n", 
+                           i, game->money, game->tower_buttons[i].cost);
+                }
+            }
+            i++;
+        }
+        
+        /* Si aucun bouton n'a été cliqué et qu'on est en mode placement de tour */
+        if (!clicked_on_button && game->placing_tower)
+        {
+            printf("Trying to place tower\n");
+            
+            if (input->mouse_y < GAME_AREA_HEIGHT)
+            {
+                grid_x = input->mouse_x / GRID_SIZE;
+                grid_y = input->mouse_y / GRID_SIZE;
+                
+                printf("Grid position: %d, %d\n", grid_x, grid_y);
+                
+                /* Placer la tour */
+                tower_place(game, grid_x, grid_y);
+            }
+            else
+            {
+                printf("Click is outside game area: %d >= %d\n", 
+                       input->mouse_y, GAME_AREA_HEIGHT);
+            }
+        }
+        else if (!clicked_on_button)
+        {
+            printf("No tower selected and click not on button\n");
+        }
+    }
+    
+    /* Clic droit pour annuler le placement de tour */
+    if (input_is_mouse_button_just_pressed(input, SDL_BUTTON_RIGHT))
+    {
+        printf("Right click - canceling tower placement\n");
+        game->placing_tower = false;
+    }
 }
 
 /**

@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 13:20:42 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 01:56:10 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:41:02 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,41 +73,41 @@ void	render_game_area(t_game *game)
  * 
  * @param game Pointeur vers la structure du jeu
  */
-void	render_grid(t_game *game)
+void render_grid(t_game *game)
 {
-	int			row;
-	int			col;
-	SDL_Rect	rect;
+    int row;
+    int col;
+    SDL_Rect rect;
 
-	row = 0;
-	while (row < GRID_ROWS)
-	{
-		col = 0;
-		while (col < GRID_COLS)
-		{
-			rect.x = col * GRID_SIZE;
-			rect.y = row * GRID_SIZE;
-			rect.w = GRID_SIZE;
-			rect.h = GRID_SIZE;
-			
-			/* Couleur différente selon le type de terrain */
-			if (game->grid[row][col] == TERRAIN_PATH)
-				SDL_SetRenderDrawColor(game->renderer, 200, 200, 100, 255);
-			else if (game->grid[row][col] == TERRAIN_OCCUPIED)
-				SDL_SetRenderDrawColor(game->renderer, 130, 130, 130, 255);
-			else /* TERRAIN_BUILDABLE */
-				SDL_SetRenderDrawColor(game->renderer, 100, 150, 100, 255);
-				
-			SDL_RenderFillRect(game->renderer, &rect);
-			
-			/* Lignes de grille */
-			SDL_SetRenderDrawColor(game->renderer, 50, 50, 50, 255);
-			SDL_RenderDrawRect(game->renderer, &rect);
-			
-			col++;
-		}
-		row++;
-	}
+    row = 0;
+    while (row < GRID_ROWS)
+    {
+        col = 0;
+        while (col < GRID_COLS)
+        {
+            rect.x = col * GRID_SIZE;
+            rect.y = row * GRID_SIZE;  /* Pas de décalage TOP_BAR_HEIGHT */
+            rect.w = GRID_SIZE;
+            rect.h = GRID_SIZE;
+            
+            /* Couleur différente selon le type de terrain */
+            if (game->grid[row][col] == TERRAIN_PATH)
+                SDL_SetRenderDrawColor(game->renderer, 200, 200, 100, 255);
+            else if (game->grid[row][col] == TERRAIN_OCCUPIED)
+                SDL_SetRenderDrawColor(game->renderer, 130, 130, 130, 255);
+            else
+                SDL_SetRenderDrawColor(game->renderer, 100, 150, 100, 255);
+                
+            SDL_RenderFillRect(game->renderer, &rect);
+            
+            /* Lignes de grille */
+            SDL_SetRenderDrawColor(game->renderer, 50, 50, 50, 255);
+            SDL_RenderDrawRect(game->renderer, &rect);
+            
+            col++;
+        }
+        row++;
+    }
 }
 
 /**

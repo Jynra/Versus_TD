@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 11:12:22 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 02:39:35 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:39:07 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 /* Window and performance constants */
 # define WINDOW_WIDTH 800
-# define WINDOW_HEIGHT 680
+# define WINDOW_HEIGHT 600
 # define FPS 60
 # define FRAME_DELAY (1000 / FPS)
 

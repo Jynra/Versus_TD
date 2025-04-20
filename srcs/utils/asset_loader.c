@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 14:40:42 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 02:06:13 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:30:32 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,24 +162,32 @@ bool	assets_load_textures(t_game *game)
  * @param game Pointeur vers la structure du jeu
  * @return true si toutes les polices ont été chargées avec succès, false sinon
  */
-bool	assets_load_fonts(t_game *game)
+bool assets_load_fonts(t_game *game)
 {
-	/* Chargement des différentes tailles de police */
-	game->fonts[FONT_SMALL] = font_load(FONT_PATH, 12);
-	game->fonts[FONT_MEDIUM] = font_load(FONT_PATH, 18);
-	game->fonts[FONT_LARGE] = font_load(FONT_PATH, 24);
-	
-	/* Vérification que toutes les polices ont été chargées */
-	for (int i = 0; i < FONT_COUNT; i++)
-	{
-		if (!game->fonts[i])
-		{
-			fprintf(stderr, "ERROR: Failed to load font %d\n", i);
-			return (false);
-		}
-	}
-	
-	return (true);
+    printf("Loading fonts from: %s\n", FONT_PATH);
+    
+    /* Chargement des différentes tailles de police */
+    game->fonts[FONT_SMALL] = font_load(FONT_PATH, 12);
+    printf("FONT_SMALL loaded: %p\n", (void*)game->fonts[FONT_SMALL]);
+    
+    game->fonts[FONT_MEDIUM] = font_load(FONT_PATH, 18);
+    printf("FONT_MEDIUM loaded: %p\n", (void*)game->fonts[FONT_MEDIUM]);
+    
+    game->fonts[FONT_LARGE] = font_load(FONT_PATH, 24);
+    printf("FONT_LARGE loaded: %p\n", (void*)game->fonts[FONT_LARGE]);
+    
+    /* Vérification que toutes les polices ont été chargées */
+    for (int i = 0; i < FONT_COUNT; i++)
+    {
+        if (!game->fonts[i])
+        {
+            fprintf(stderr, "ERROR: Failed to load font %d\n", i);
+            return (false);
+        }
+    }
+    
+    printf("All fonts loaded successfully\n");
+    return (true);
 }
 
 /**
@@ -286,22 +294,28 @@ void	texture_free(SDL_Texture *texture)
  * @param size Taille de la police
  * @return TTF_Font* Pointeur vers la police chargée, NULL en cas d'erreur
  */
-TTF_Font	*font_load(const char *path, int size)
+TTF_Font *font_load(const char *path, int size)
 {
-	TTF_Font	*font;
-	
-	if (!path || size <= 0)
-		return (NULL);
-		
-	font = TTF_OpenFont(path, size);
-	if (!font)
-	{
-		fprintf(stderr, "ERROR: Failed to load font %s: %s\n", 
-			path, TTF_GetError());
-		return (NULL);
-	}
-	
-	return (font);
+    TTF_Font *font;
+    
+    if (!path || size <= 0)
+    {
+        fprintf(stderr, "ERROR: Invalid parameters for font_load\n");
+        return (NULL);
+    }
+    
+    printf("Attempting to load font: %s (size: %d)\n", path, size);
+    
+    font = TTF_OpenFont(path, size);
+    if (!font)
+    {
+        fprintf(stderr, "ERROR: Failed to load font %s: %s\n", 
+            path, TTF_GetError());
+        return (NULL);
+    }
+    
+    printf("Font successfully loaded: %p\n", (void*)font);
+    return (font);
 }
 
 /**

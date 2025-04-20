@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 13:35:42 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 01:59:26 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:47:47 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,47 +47,23 @@ void	ui_init(t_game *game)
  * 
  * @param game Pointeur vers la structure du jeu
  */
-void	ui_render_toolbar(t_game *game)
+void ui_render_toolbar(t_game *game)
 {
-	SDL_Rect	toolbar_rect;
+    SDL_Rect toolbar_rect;
 
-	/* Fond de la barre d'outils */
-	toolbar_rect.x = 0;
-	toolbar_rect.y = GAME_AREA_HEIGHT;
-	toolbar_rect.w = WINDOW_WIDTH;
-	toolbar_rect.h = TOOLBAR_HEIGHT;
-	SDL_SetRenderDrawColor(game->renderer, 80, 80, 100, 255);
-	SDL_RenderFillRect(game->renderer, &toolbar_rect);
-	
-	/* Affichage des boutons de tours */
-	tower_buttons_render(game);
-	
-	/* Affichage des statistiques du jeu */
-	ui_render_stats(game);
-	
-	/* Affichage du bouton de pause */
-	SDL_SetRenderDrawColor(game->renderer, 120, 120, 150, 255);
-	SDL_RenderFillRect(game->renderer, &game->pause_button);
-	SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 255);
-	SDL_RenderDrawRect(game->renderer, &game->pause_button);
-	
-	/* Deux barres verticales pour le symbole de pause */
-	SDL_Rect pause_symbol1;
-	SDL_Rect pause_symbol2;
-	
-	pause_symbol1.x = game->pause_button.x + game->pause_button.w / 3 - 2;
-	pause_symbol1.y = game->pause_button.y + game->pause_button.h / 4;
-	pause_symbol1.w = 4;
-	pause_symbol1.h = game->pause_button.h / 2;
-	
-	pause_symbol2.x = game->pause_button.x + 2 * game->pause_button.w / 3 - 2;
-	pause_symbol2.y = game->pause_button.y + game->pause_button.h / 4;
-	pause_symbol2.w = 4;
-	pause_symbol2.h = game->pause_button.h / 2;
-	
-	SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, 255);
-	SDL_RenderFillRect(game->renderer, &pause_symbol1);
-	SDL_RenderFillRect(game->renderer, &pause_symbol2);
+    /* Fond de la barre d'outils */
+    toolbar_rect.x = 0;
+    toolbar_rect.y = GAME_AREA_HEIGHT;  /* Pas de TOP_BAR_HEIGHT */
+    toolbar_rect.w = WINDOW_WIDTH;
+    toolbar_rect.h = TOOLBAR_HEIGHT;
+    SDL_SetRenderDrawColor(game->renderer, 80, 80, 100, 255);
+    SDL_RenderFillRect(game->renderer, &toolbar_rect);
+    
+    /* Affichage des boutons de tours */
+    tower_buttons_render(game);
+    
+    /* Affichage des statistiques du jeu */
+    ui_render_stats(game);
 }
 
 /**
@@ -281,15 +257,18 @@ void	ui_render_round_info(t_game *game)
  * @param dest Rectangle de destination
  * @param color Couleur du texte
  */
-void	ui_render_text(t_game *game, char *text, TTF_Font *font,
-		SDL_Rect dest, SDL_Color color)
+void ui_render_text(t_game *game, char *text, TTF_Font *font,
+	SDL_Rect dest, SDL_Color color)
 {
-	SDL_Surface	*surface;
-	SDL_Texture	*texture;
-
-	if (!font)
+	SDL_Surface *surface;
+	SDL_Texture *texture;
+	
+	if (!font || !text)
+	{
+		fprintf(stderr, "ERROR: Null font or text in ui_render_text\n");
 		return;
-		
+	}
+	
 	surface = TTF_RenderText_Blended(font, text, color);
 	if (!surface)
 	{

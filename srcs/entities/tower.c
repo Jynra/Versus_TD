@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 12:15:42 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 02:37:55 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:20:11 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,41 +44,48 @@ void	tower_init(t_tower *tower, int type, float x, float y)
  * 
  * @param game Pointeur vers la structure du jeu
  */
-void	tower_buttons_init(t_game *game)
+void tower_buttons_init(t_game *game)
 {
-	int	start_x;
-	int	button_y;
-
-	start_x = (WINDOW_WIDTH - (MAX_TOWER_TYPES 
-				* (TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING))) / 2;
-	button_y = GAME_AREA_HEIGHT + (TOOLBAR_HEIGHT - TOWER_BUTTON_SIZE) / 2;
-	
-	/* Bouton tour basique */
-	game->tower_buttons[0].rect.x = start_x;
-	game->tower_buttons[0].rect.y = button_y;
-	game->tower_buttons[0].rect.w = TOWER_BUTTON_SIZE;
-	game->tower_buttons[0].rect.h = TOWER_BUTTON_SIZE;
-	game->tower_buttons[0].tower_type = TOWER_TYPE_BASIC;
-	game->tower_buttons[0].description = "Basic Tower";
-	game->tower_buttons[0].cost = COST_TOWER_BASIC;
-	
-	/* Bouton tour ralentissante */
-	game->tower_buttons[1].rect.x = start_x + TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING;
-	game->tower_buttons[1].rect.y = button_y;
-	game->tower_buttons[1].rect.w = TOWER_BUTTON_SIZE;
-	game->tower_buttons[1].rect.h = TOWER_BUTTON_SIZE;
-	game->tower_buttons[1].tower_type = TOWER_TYPE_SLOW;
-	game->tower_buttons[1].description = "Slow Tower";
-	game->tower_buttons[1].cost = COST_TOWER_SLOW;
-	
-	/* Bouton tour multi-cibles */
-	game->tower_buttons[2].rect.x = start_x + 2 * (TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING);
-	game->tower_buttons[2].rect.y = button_y;
-	game->tower_buttons[2].rect.w = TOWER_BUTTON_SIZE;
-	game->tower_buttons[2].rect.h = TOWER_BUTTON_SIZE;
-	game->tower_buttons[2].tower_type = TOWER_TYPE_MULTI;
-	game->tower_buttons[2].description = "Multi Tower";
-	game->tower_buttons[2].cost = COST_TOWER_MULTI;
+    int start_x;
+    int button_y;
+    
+    printf("Initializing tower buttons\n");
+    
+    start_x = (WINDOW_WIDTH - (MAX_TOWER_TYPES 
+                * (TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING))) / 2;
+    button_y = GAME_AREA_HEIGHT + (TOOLBAR_HEIGHT - TOWER_BUTTON_SIZE) / 2;
+    
+    printf("Button start position: x=%d, y=%d\n", start_x, button_y);
+    
+    game->tower_buttons[0].rect.x = start_x;
+    game->tower_buttons[0].rect.y = button_y;
+    game->tower_buttons[0].rect.w = TOWER_BUTTON_SIZE;
+    game->tower_buttons[0].rect.h = TOWER_BUTTON_SIZE;
+    game->tower_buttons[0].tower_type = TOWER_TYPE_BASIC;
+    game->tower_buttons[0].cost = COST_TOWER_BASIC;
+    
+    game->tower_buttons[1].rect.x = start_x + TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING;
+    game->tower_buttons[1].rect.y = button_y;
+    game->tower_buttons[1].rect.w = TOWER_BUTTON_SIZE;
+    game->tower_buttons[1].rect.h = TOWER_BUTTON_SIZE;
+    game->tower_buttons[1].tower_type = TOWER_TYPE_SLOW;
+    game->tower_buttons[1].cost = COST_TOWER_SLOW;
+    
+    game->tower_buttons[2].rect.x = start_x + 2 * (TOWER_BUTTON_SIZE + TOWER_BUTTON_PADDING);
+    game->tower_buttons[2].rect.y = button_y;
+    game->tower_buttons[2].rect.w = TOWER_BUTTON_SIZE;
+    game->tower_buttons[2].rect.h = TOWER_BUTTON_SIZE;
+    game->tower_buttons[2].tower_type = TOWER_TYPE_MULTI;
+    game->tower_buttons[2].cost = COST_TOWER_MULTI;
+    
+    /* Afficher les coordonnées de chaque bouton pour vérification */
+    for (int i = 0; i < MAX_TOWER_TYPES; i++)
+    {
+        printf("Tower button %d: x=%d, y=%d, w=%d, h=%d, type=%d, cost=%d\n", 
+               i, game->tower_buttons[i].rect.x, game->tower_buttons[i].rect.y,
+               game->tower_buttons[i].rect.w, game->tower_buttons[i].rect.h,
+               game->tower_buttons[i].tower_type, game->tower_buttons[i].cost);
+    }
 }
 
 /**
@@ -114,44 +121,49 @@ bool	tower_can_be_placed(t_game *game, int grid_x, int grid_y)
  * @param grid_x Coordonnée X sur la grille
  * @param grid_y Coordonnée Y sur la grille
  */
-void	tower_place(t_game *game, int grid_x, int grid_y)
+void tower_place(t_game *game, int grid_x, int grid_y)
 {
-	int	tower_cost;
-	int	i;
-	int	center_x;
-	int	center_y;
+    int tower_cost;
+    int i;
+    int center_x;
+    int center_y;
 
-	if (!tower_can_be_placed(game, grid_x, grid_y))
-		return;
-
-	/* Calcul du coût en fonction du type de tour */
-	if (game->selected_tower_type == TOWER_TYPE_BASIC)
-		tower_cost = COST_TOWER_BASIC;
-	else if (game->selected_tower_type == TOWER_TYPE_SLOW)
-		tower_cost = COST_TOWER_SLOW;
-	else if (game->selected_tower_type == TOWER_TYPE_MULTI)
-		tower_cost = COST_TOWER_MULTI;
-	else
-		return;
-
-	/* Trouver un emplacement libre pour la tour */
-	i = 0;
-	while (i < MAX_TOWERS)
-	{
-		if (!game->towers[i].active)
-		{
-			center_x = grid_x * GRID_SIZE + GRID_SIZE / 2;
-			center_y = grid_y * GRID_SIZE + GRID_SIZE / 2;
-			
-			tower_init(&game->towers[i], game->selected_tower_type, 
-						center_x, center_y);
-			
-			game->money -= tower_cost;
-			game->grid[grid_y][grid_x] = TERRAIN_OCCUPIED;
-			break;
-		}
-		i++;
-	}
+    if (grid_x < 0 || grid_x >= GRID_COLS || grid_y < 0 || grid_y >= GRID_ROWS)
+        return;
+    if (game->grid[grid_y][grid_x] != TERRAIN_BUILDABLE)
+        return;
+    
+    tower_cost = 0;
+    if (game->selected_tower_type == TOWER_TYPE_BASIC)
+        tower_cost = COST_TOWER_BASIC;
+    else if (game->selected_tower_type == TOWER_TYPE_SLOW)
+        tower_cost = COST_TOWER_SLOW;
+    else if (game->selected_tower_type == TOWER_TYPE_MULTI)
+        tower_cost = COST_TOWER_MULTI;
+    else
+        return;
+    
+    if (game->money < tower_cost)
+        return;
+    
+    i = 0;
+    while (i < MAX_TOWERS)
+    {
+        if (!game->towers[i].active)
+        {
+            center_x = grid_x * GRID_SIZE + GRID_SIZE / 2;
+            center_y = grid_y * GRID_SIZE + GRID_SIZE / 2;
+            
+            tower_init(&game->towers[i], game->selected_tower_type, center_x, center_y);
+            game->towers[i].cost = tower_cost;
+            
+            game->money -= tower_cost;
+            game->grid[grid_y][grid_x] = TERRAIN_OCCUPIED;
+            game->placing_tower = false;  /* Désélectionne la tour après placement */
+            break;
+        }
+        i++;
+    }
 }
 
 /**
@@ -392,7 +404,7 @@ void	tower_buttons_render(t_game *game)
 		text_rect.w = 50;
 		text_rect.h = 15;
 		
-		ui_render_text(game, cost_text, game->font_small, text_rect, text_color);
+		ui_render_text(game, cost_text, game->fonts[FONT_SMALL], text_rect, text_color);
 		
 		i++;
 	}

@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 11:01:22 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 01:35:25 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:17:46 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ typedef struct s_game t_game;
 /* UI related functions */
 void	ui_init(t_game *game);
 void	ui_render_toolbar(t_game *game);
+void	ui_render_top_bar(t_game *game);
 void	ui_render_stats(t_game *game);
 void	ui_render_game_over(t_game *game);
 void	ui_render_pause_menu(t_game *game);

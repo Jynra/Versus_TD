@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 11:16:45 by ellucas           #+#    #+#             */
-/*   Updated: 2025/04/20 02:49:22 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/04/20 13:39:20 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,32 +23,32 @@ static void	init_grid(t_game *game);
  * @param game Pointeur vers la structure du jeu
  * @return true si l'initialisation a réussi, false sinon
  */
-bool	game_init(t_game *game)
+bool game_init(t_game *game)
 {
-	if (!game)
-	{
-		fprintf(stderr, "ERROR: Null game pointer in game_init\n");
-		return (false);
-	}
-	
-	srand(time(NULL));
-	
-	if (!sdl_init(game))
-		return (false);
-	
-	if (!assets_load_all(game))
-	{
-		fprintf(stderr, "ERROR: Failed to load assets\n");
-		game_cleanup(game);
-		return (false);
-	}
-	
-	init_game_variables(game);
-	init_grid(game);
-	path_init(game);
-	ui_init(game);
-	
-	return (true);
+    if (!game)
+    {
+        fprintf(stderr, "ERROR: Null game pointer in game_init\n");
+        return (false);
+    }
+    
+    srand(time(NULL));
+    
+    if (!sdl_init(game))
+        return (false);
+    
+    if (!assets_load_all(game))
+    {
+        fprintf(stderr, "ERROR: Failed to load assets\n");
+        game_cleanup(game);
+        return (false);
+    }
+    
+    init_game_variables(game);
+    init_grid(game);
+    path_init(game);
+    ui_init(game);
+    
+    return (true);
 }
 
 /**
@@ -56,18 +56,43 @@ bool	game_init(t_game *game)
  * 
  * @param game Pointeur vers la structure du jeu
  */
-void	game_cleanup(t_game *game)
+void game_cleanup(t_game *game)
 {
-	assets_free_all(game);
-	
-	if (game->renderer)
-		SDL_DestroyRenderer(game->renderer);
-	if (game->window)
-		SDL_DestroyWindow(game->window);
-	
-	TTF_Quit();
-	IMG_Quit();
-	SDL_Quit();
+    printf("Starting game cleanup\n");
+    
+    if (!game)
+        return;
+    
+    /* Libération des ressources graphiques */
+    assets_free_all(game);
+    
+    /* Destruction du renderer */
+    if (game->renderer)
+    {
+        SDL_DestroyRenderer(game->renderer);
+        game->renderer = NULL;
+        printf("Renderer destroyed\n");
+    }
+    
+    /* Destruction de la fenêtre */
+    if (game->window)
+    {
+        SDL_DestroyWindow(game->window);
+        game->window = NULL;
+        printf("Window destroyed\n");
+    }
+    
+    /* Fermeture des bibliothèques SDL */
+    TTF_Quit();
+    printf("TTF_Quit done\n");
+    
+    IMG_Quit();
+    printf("IMG_Quit done\n");
+    
+    SDL_Quit();
+    printf("SDL_Quit done\n");
+    
+    printf("Game cleanup complete\n");
 }
 
 /**
@@ -120,37 +145,37 @@ void	game_reset(t_game *game)
  * 
  * @param game Pointeur vers la structure du jeu
  */
-void	game_render(t_game *game)
+void game_render(t_game *game)
 {
-	/* Effacer l'écran */
-	render_clear(game);
-	
-	/* Rendu en fonction de l'état du jeu */
-	if (game->state == STATE_PLAYING)
-	{
-		render_game_area(game);
-		ui_render_toolbar(game);
-		ui_render_round_info(game);
-		
-		/* Affichage des informations de débogage si activé */
-		if (DEBUG_MODE)
-			render_debug_info(game, true, false);
-	}
-	else if (game->state == STATE_GAME_OVER)
-	{
-		render_game_area(game);
-		ui_render_toolbar(game);
-		ui_render_game_over(game);
-	}
-	else if (game->state == STATE_PAUSED)
-	{
-		render_game_area(game);
-		ui_render_toolbar(game);
-		ui_render_pause_menu(game);
-	}
-	
-	/* Présenter le rendu final à l'écran */
-	render_present(game);
+    /* Effacer l'écran */
+    render_clear(game);
+    
+    /* Rendu en fonction de l'état du jeu */
+    if (game->state == STATE_PLAYING)
+    {
+        render_game_area(game);
+        ui_render_toolbar(game);
+        ui_render_round_info(game);
+        
+        /* Affichage des informations de débogage si activé */
+        if (DEBUG_MODE)
+            render_debug_info(game, true, false);
+    }
+    else if (game->state == STATE_GAME_OVER)
+    {
+        render_game_area(game);
+        ui_render_toolbar(game);
+        ui_render_game_over(game);
+    }
+    else if (game->state == STATE_PAUSED)
+    {
+        render_game_area(game);
+        ui_render_toolbar(game);
+        ui_render_pause_menu(game);
+    }
+    
+    /* Présenter le rendu final à l'écran */
+    render_present(game);
 }
 
 /**
