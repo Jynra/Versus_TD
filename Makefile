@@ -6,7 +6,7 @@
 #    By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/25 16:00:00 by jynra             #+#    #+#              #
-#    Updated: 2025/05/25 19:59:32 by ellucas          ###   ########.fr        #
+#    Updated: 2025/05/25 22:33:15 by ellucas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,42 +35,37 @@ SRC_DIR = srcs
 OBJ_DIR = objs
 
 # =============================================================================
-# SOURCE FILES - PROGRESSIVE BUILD
+# SOURCE FILES - EXPLICIT LISTS FOR RELIABILITY
 # =============================================================================
 
-# Phase 2 - Foundation (Complete)
-PHASE2_SRCS = srcs/main.c \
-              srcs/game/init.c \
-              srcs/game/update.c \
-              srcs/game/render.c \
-              srcs/game/cleanup.c \
-              srcs/utils/math.c \
-              srcs/utils/debug.c \
-              srcs/utils/memory.c \
-              srcs/utils/file.c \
-              srcs/systems/input.c \
-              srcs/temp_stubs.c
+# Base objects (shared between stable and premium)
+OBJS_BASE = objs/main.o \
+            objs/entities_base.o \
+            objs/game/init.o \
+            objs/game/update.o \
+            objs/game/render.o \
+            objs/game/cleanup.o \
+            objs/utils/math.o \
+            objs/utils/debug.o \
+            objs/utils/memory.o \
+            objs/utils/file.o \
+            objs/systems/input.o \
+            objs/entities/enemy.o \
+            objs/entities/spawner.o \
+            objs/entities/tower.o \
+            objs/entities/projectile.o
 
-# Phase 3 - Entities (Complete)
-PHASE3_SRCS = srcs/entities/enemy.c \
-              srcs/entities/spawner.c \
-              srcs/entities/tower.c \
-              srcs/entities/projectile.c
+# Stable build objects (Base + temp_stubs)
+OBJS_STABLE = $(OBJS_BASE) \
+              objs/temp_stubs.o
 
-# Phase 4 - Advanced Systems (Complete!)
-PHASE4_SRCS = srcs/systems/effects.c \
-              srcs/systems/physics.c \
-              srcs/systems/ui.c \
-              srcs/systems/upgrades.c \
-              srcs/systems/waves.c
-
-# Build configurations
-SRCS_STABLE = $(PHASE2_SRCS) $(PHASE3_SRCS)
-SRCS_PREMIUM = $(PHASE2_SRCS) $(PHASE3_SRCS) $(PHASE4_SRCS)
-
-# Default to stable build
-SRCS = $(SRCS_STABLE)
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+# Premium build objects (Base + Phase 4, NO temp_stubs)
+OBJS_PREMIUM = $(OBJS_BASE) \
+               objs/systems/effects.o \
+               objs/systems/physics.o \
+               objs/systems/ui.o \
+               objs/systems/upgrades.o \
+               objs/systems/waves.o
 
 # Header files
 HEADERS = includes/config.h \
@@ -95,14 +90,16 @@ RESET = \033[0m
 
 # Default build - Stable gameplay (Phase 3)
 all: banner $(NAME)
+
+$(NAME): directories $(OBJS_STABLE)
+	@echo "$(YELLOW)Linking $(NAME) (STABLE)...$(RESET)"
+	@$(CC) $(CFLAGS) $(OBJS_STABLE) $(LIBS) -o $(NAME)
 	@echo "$(GREEN)✓ Stable build complete!$(RESET)"
 	@echo "$(CYAN)Run with: ./$(NAME)$(RESET)"
 	@echo "$(YELLOW)For premium experience: make premium$(RESET)"
 
 # Premium build - All Phase 4 features
-premium: SRCS = $(SRCS_PREMIUM)
-premium: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-premium: banner-premium $(NAME)
+premium: banner-premium $(NAME)-premium
 	@echo "$(BOLD)$(GREEN)🎉 PREMIUM BUILD COMPLETE! 🎉$(RESET)"
 	@echo "$(CYAN)✨ Phase 4 features active:$(RESET)"
 	@echo "$(GREEN)  • Particle effects$(RESET)"
@@ -110,29 +107,125 @@ premium: banner-premium $(NAME)
 	@echo "$(GREEN)  • Professional UI$(RESET)"
 	@echo "$(GREEN)  • Tower upgrades$(RESET)"
 	@echo "$(GREEN)  • Boss waves$(RESET)"
+	@cp $(NAME)-premium $(NAME)
+
+$(NAME)-premium: directories $(OBJS_PREMIUM)
+	@echo "$(YELLOW)Linking $(NAME) (PREMIUM)...$(RESET)"
+	@$(CC) $(CFLAGS) $(OBJS_PREMIUM) $(LIBS) -o $(NAME)-premium
+	@echo "$(GREEN)✓ Premium linking complete$(RESET)"
 
 # Aliases
 complete: premium
 phase4: premium
 
-# Create executable
-$(NAME): $(OBJ_DIR) $(OBJS)
-	@echo "$(YELLOW)Linking $(NAME)...$(RESET)"
-	@$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o $(NAME)
-	@echo "$(GREEN)✓ Linking complete$(RESET)"
+# =============================================================================
+# DIRECTORY CREATION
+# =============================================================================
 
-# Create object directory structure
-$(OBJ_DIR):
+directories:
+	@echo "$(BLUE)Creating object directories...$(RESET)"
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)/game
 	@mkdir -p $(OBJ_DIR)/entities
 	@mkdir -p $(OBJ_DIR)/systems
 	@mkdir -p $(OBJ_DIR)/utils
+	@echo "$(GREEN)✓ Directory structure created$(RESET)"
 
-# Compile source files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
-	@echo "$(BLUE)Compiling $<$(RESET)"
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+# =============================================================================
+# COMPILATION RULES - EXPLICIT FOR EACH FILE
+# =============================================================================
+
+# Main files
+objs/main.o: srcs/main.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/main.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/main.c -o objs/main.o
+
+# NEW: Entities base file (shared functions)
+objs/entities_base.o: srcs/entities_base.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/entities_base.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/entities_base.c -o objs/entities_base.o
+
+# TEMP_STUBS - Only for stable build
+objs/temp_stubs.o: srcs/temp_stubs.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/temp_stubs.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/temp_stubs.c -o objs/temp_stubs.o
+
+# Game files
+objs/game/init.o: srcs/game/init.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/game/init.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/game/init.c -o objs/game/init.o
+
+objs/game/update.o: srcs/game/update.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/game/update.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/game/update.c -o objs/game/update.o
+
+objs/game/render.o: srcs/game/render.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/game/render.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/game/render.c -o objs/game/render.o
+
+objs/game/cleanup.o: srcs/game/cleanup.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/game/cleanup.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/game/cleanup.c -o objs/game/cleanup.o
+
+# Utils files
+objs/utils/math.o: srcs/utils/math.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/utils/math.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/utils/math.c -o objs/utils/math.o
+
+objs/utils/debug.o: srcs/utils/debug.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/utils/debug.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/utils/debug.c -o objs/utils/debug.o
+
+objs/utils/memory.o: srcs/utils/memory.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/utils/memory.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/utils/memory.c -o objs/utils/memory.o
+
+objs/utils/file.o: srcs/utils/file.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/utils/file.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/utils/file.c -o objs/utils/file.o
+
+# Systems files
+objs/systems/input.o: srcs/systems/input.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/systems/input.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/input.c -o objs/systems/input.o
+
+# PHASE 4 SYSTEMS - Only for premium build
+objs/systems/effects.o: srcs/systems/effects.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/systems/effects.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/effects.c -o objs/systems/effects.o
+
+objs/systems/physics.o: srcs/systems/physics.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/systems/physics.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/physics.c -o objs/systems/physics.o
+
+objs/systems/ui.o: srcs/systems/ui.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/systems/ui.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/ui.c -o objs/systems/ui.o
+
+objs/systems/upgrades.o: srcs/systems/upgrades.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/systems/upgrades.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/upgrades.c -o objs/systems/upgrades.o
+
+objs/systems/waves.o: srcs/systems/waves.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/systems/waves.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/waves.c -o objs/systems/waves.o
+
+# Entities files
+objs/entities/enemy.o: srcs/entities/enemy.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/entities/enemy.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/entities/enemy.c -o objs/entities/enemy.o
+
+objs/entities/spawner.o: srcs/entities/spawner.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/entities/spawner.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/entities/spawner.c -o objs/entities/spawner.o
+
+objs/entities/tower.o: srcs/entities/tower.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/entities/tower.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/entities/tower.c -o objs/entities/tower.o
+
+objs/entities/projectile.o: srcs/entities/projectile.c $(HEADERS)
+	@echo "$(BLUE)Compiling srcs/entities/projectile.c$(RESET)"
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/entities/projectile.c -o objs/entities/projectile.o
 
 # =============================================================================
 # DEVELOPMENT BUILDS
@@ -144,9 +237,7 @@ debug: clean $(NAME)
 	@echo "$(RED)✓ Debug build complete$(RESET)"
 
 debug-premium: CFLAGS += $(DEBUG_FLAGS)
-debug-premium: SRCS = $(SRCS_PREMIUM)
-debug-premium: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-debug-premium: clean $(NAME)
+debug-premium: clean premium
 	@echo "$(RED)✓ Premium debug build complete$(RESET)"
 
 # Release builds
@@ -155,13 +246,11 @@ release: clean $(NAME)
 	@echo "$(GREEN)✓ Release build complete$(RESET)"
 
 release-premium: CFLAGS += $(RELEASE_FLAGS)
-release-premium: SRCS = $(SRCS_PREMIUM)
-release-premium: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-release-premium: clean $(NAME)
+release-premium: clean premium
 	@echo "$(GREEN)✓ Premium release build complete$(RESET)"
 
 # =============================================================================
-# TESTING & UTILITIES
+# UTILITIES
 # =============================================================================
 
 # Test builds
@@ -186,6 +275,7 @@ run-premium: premium
 clean:
 	@echo "$(RED)Cleaning build files...$(RESET)"
 	@rm -rf $(OBJ_DIR)
+	@rm -f $(NAME)-premium
 
 fclean: clean
 	@echo "$(RED)Removing executable...$(RESET)"
@@ -195,10 +285,26 @@ re: fclean all
 re-premium: fclean premium
 
 # =============================================================================
+# DEBUG TARGETS
+# =============================================================================
+
+# Show variables for debugging
+debug-vars:
+	@echo "$(CYAN)OBJS_STABLE:$(RESET) $(OBJS_STABLE)"
+	@echo "$(CYAN)OBJS_PREMIUM:$(RESET) $(OBJS_PREMIUM)"
+
+# Test single file compilation
+test-effects:
+	@echo "$(BLUE)Testing effects.c compilation...$(RESET)"
+	@mkdir -p $(OBJ_DIR)/systems
+	@$(CC) $(CFLAGS) $(INCLUDES) -c srcs/systems/effects.c -o $(OBJ_DIR)/systems/effects.o
+	@echo "$(GREEN)✓ effects.o created$(RESET)"
+	@ls -la $(OBJ_DIR)/systems/effects.o
+
+# =============================================================================
 # INFORMATION TARGETS
 # =============================================================================
 
-# Project status
 status:
 	@echo "$(CYAN)=== VERSUS TD CLEAN - PROJECT STATUS ===$(RESET)"
 	@echo "$(GREEN)Phase 2 (Foundation): ✅ Complete$(RESET)"
@@ -206,10 +312,9 @@ status:
 	@echo "$(GREEN)Phase 4 (Premium):    ✅ Complete$(RESET)"
 	@echo ""
 	@echo "$(YELLOW)Available builds:$(RESET)"
-	@echo "  make         - Stable gameplay"
-	@echo "  make premium - Full premium experience"
+	@echo "  make         - Stable gameplay (with stubs)"
+	@echo "  make premium - Full premium experience (Phase 4)"
 
-# Show Phase 4 features
 features:
 	@echo "$(BOLD)$(CYAN)🌟 PHASE 4 PREMIUM FEATURES$(RESET)"
 	@echo ""
@@ -218,38 +323,6 @@ features:
 	@echo "$(YELLOW)🖥️  Professional UI:$(RESET) Tooltips, progress bars"
 	@echo "$(YELLOW)⬆️  Tower Upgrades:$(RESET) 3 levels, special abilities"
 	@echo "$(YELLOW)👑 Boss Waves:$(RESET) Special events every 5 waves"
-
-# File organization
-files:
-	@echo "$(CYAN)Stable build (Phase 3):$(RESET)"
-	@echo "  Files: $(words $(SRCS_STABLE))"
-	@echo "$(CYAN)Premium build (Phase 4):$(RESET)"
-	@echo "  Files: $(words $(SRCS_PREMIUM))"
-	@echo "  New systems: $(words $(PHASE4_SRCS))"
-
-# Project statistics
-stats:
-	@echo "$(CYAN)=== PROJECT STATISTICS ===$(RESET)"
-	@echo "$(YELLOW)Total source files:$(RESET) $(words $(SRCS_PREMIUM))"
-	@echo "$(YELLOW)Header files:$(RESET) $(words $(HEADERS))"
-	@echo "$(YELLOW)Completion:$(RESET) $(BOLD)$(GREEN)100%$(RESET)"
-	@echo "$(YELLOW)Status:$(RESET) Ready for commercial release!"
-
-# Check file integrity
-check:
-	@echo "$(BLUE)Checking files...$(RESET)"
-	@missing=0; \
-	for file in $(SRCS_PREMIUM); do \
-		if [ ! -f "$$file" ]; then \
-			echo "$(RED)❌ Missing: $$file$(RESET)"; \
-			missing=$$((missing + 1)); \
-		fi; \
-	done; \
-	if [ $$missing -eq 0 ]; then \
-		echo "$(GREEN)✅ All files present!$(RESET)"; \
-	else \
-		echo "$(RED)❌ $$missing files missing$(RESET)"; \
-	fi
 
 # =============================================================================
 # BANNERS
@@ -271,38 +344,36 @@ banner-premium:
 	@echo "╚════════════════════════════════════════════════════════════╝"
 	@echo "$(RESET)"
 
-# Help system
 help:
 	@echo "$(BOLD)$(CYAN)Versus TD Clean - Makefile Help$(RESET)"
 	@echo ""
 	@echo "$(BOLD)Main builds:$(RESET)"
-	@echo "  $(GREEN)make$(RESET)         - Stable build (recommended for testing)"
-	@echo "  $(GREEN)make premium$(RESET) - Premium build (all Phase 4 features)"
-	@echo ""
-	@echo "$(BOLD)Development:$(RESET)"
-	@echo "  $(YELLOW)make debug$(RESET)   - Debug build with AddressSanitizer"
-	@echo "  $(YELLOW)make release$(RESET) - Optimized release build"
+	@echo "  $(GREEN)make$(RESET)         - Stable build (with stubs)"
+	@echo "  $(GREEN)make premium$(RESET) - Premium build (Phase 4 real implementations)"
 	@echo ""
 	@echo "$(BOLD)Testing:$(RESET)"
 	@echo "  $(BLUE)make test$(RESET)    - Quick functionality test"
 	@echo "  $(BLUE)make run$(RESET)     - Build and run immediately"
 	@echo ""
+	@echo "$(BOLD)Debug:$(RESET)"
+	@echo "  $(CYAN)make debug-vars$(RESET) - Show build variables"
+	@echo "  $(CYAN)make test-effects$(RESET) - Test single file compilation"
+	@echo ""
 	@echo "$(BOLD)Information:$(RESET)"
 	@echo "  $(CYAN)make status$(RESET)  - Show project status"
 	@echo "  $(CYAN)make features$(RESET) - Show Phase 4 features"
-	@echo "  $(CYAN)make stats$(RESET)   - Show project statistics"
 	@echo ""
 	@echo "$(BOLD)Cleanup:$(RESET)"
 	@echo "  $(RED)make clean$(RESET)   - Remove object files"
 	@echo "  $(RED)make fclean$(RESET)  - Remove all build files"
-	@echo "  $(RED)make re$(RESET)      - Clean rebuild"
 
 # =============================================================================
 # PHONY TARGETS
 # =============================================================================
 
-.PHONY: all premium complete phase4 clean fclean re re-premium debug release \
-        debug-premium release-premium test test-premium run run-premium \
-        status features files stats check banner banner-premium help
+.PHONY: all premium complete phase4 directories clean fclean re re-premium \
+        debug debug-premium release release-premium test test-premium \
+        run run-premium status features banner banner-premium help \
+        debug-vars test-effects
 
 .DEFAULT_GOAL := all
