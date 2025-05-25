@@ -1,116 +1,189 @@
-# Versus_TD
+# Versus TD Clean - Phase 2 Complete
 
-A simple Tower Defense game written in C using SDL2.
+## 🎯 État Actuel
 
-## Overview
+**Phase 2 terminée** : Fondations et utilitaires implémentés avec succès !
 
-Versus_TD is a grid-based tower defense game where players strategically place towers to defend against waves of enemies moving along a path. The game features multiple tower types with different abilities, resource management, and progressively challenging gameplay.
+### ✅ Ce qui fonctionne actuellement
 
-## Features
+- **Architecture propre** respectant la norme Jynra
+- **Système de build professionnel** avec Makefile avancé
+- **Initialisation SDL** complète (fenêtre, renderer, fonts)
+- **Système de debug** avec logs colorés et niveaux
+- **Utilitaires mathématiques** (vecteurs, couleurs, distances)
+- **Gestion mémoire** sécurisée avec tracking
+- **Boucle de jeu** de base (update/render)
+- **Système d'input** (clavier/souris)
+- **Rendu primitif** (lignes, cercles, rectangles, texte)
 
-- **Multiple Tower Types**:
-  - Basic Tower: Balanced damage and range
-  - Slow Tower: Reduces enemy movement speed
-  - Multi-Target Tower: Can attack multiple enemies at once
+### 🎮 Fonctionnalités Actuelles
 
-- **Resource Management**: Players earn money by defeating enemies and spend it to build towers
+Lancez `./versus_td_clean` pour tester :
 
-- **Simple Interface**: Grid-based gameplay with intuitive controls
+- **Fenêtre de jeu** 1024x768 avec titre
+- **Debug info** (F1) : FPS, statistiques
+- **Grille de jeu** visible en mode debug
+- **Chemin des ennemis** tracé en jaune
+- **Pause/Resume** (ESC)
+- **Interface basique** avec boutons de tours
 
-- **Visual Feedback**: Tower range indicators, enemy health bars, and projectile animations
+## 🏗️ Architecture Implémentée
 
-## Requirements
-
-- SDL2
-- SDL2_image
-- SDL2_ttf
-- C compiler (GCC recommended)
-- Make
-
-## Installation
-
-1. Install the required dependencies:
-
-```bash
-# On Debian/Ubuntu
-sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev
-
-# On macOS with Homebrew
-brew install sdl2 sdl2_image sdl2_ttf
-
-# On Fedora
-sudo dnf install SDL2-devel SDL2_image-devel SDL2_ttf-devel
+```
+Versus_TD_Clean/
+├── includes/           # Headers complets (6 fichiers)
+│   ├── config.h       # 200+ constantes
+│   ├── types.h        # Toutes les structures
+│   ├── game.h         # Interface principale
+│   ├── entities.h     # Entités du jeu
+│   ├── systems.h      # Systèmes
+│   └── utils.h        # Utilitaires
+├── srcs/
+│   ├── main.c         # Point d'entrée ✅
+│   ├── game/          # Logique principale ✅
+│   │   ├── init.c     # Initialisation SDL
+│   │   ├── update.c   # Boucle de jeu
+│   │   ├── render.c   # Système de rendu
+│   │   └── cleanup.c  # Nettoyage
+│   ├── utils/         # Utilitaires ✅
+│   │   ├── math.c     # Maths + vecteurs
+│   │   ├── debug.c    # Système de debug
+│   │   ├── memory.c   # Gestion mémoire
+│   │   └── file.c     # Opérations fichiers
+│   └── systems/       # Systèmes de base ✅
+│       └── input.c    # Gestion entrées
+└── Makefile           # Build system complet ✅
 ```
 
-2. Clone the repository:
+## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/yourusername/Versus_TD.git
-cd Versus_TD
-```
+# Compiler et tester
+chmod +x test_build.sh
+./test_build.sh
 
-3. Compile the game:
-
-```bash
+# Ou manuellement
+make clean
 make
+./versus_td_clean
+
+# Commandes utiles
+make debug          # Build debug
+make stats          # Statistiques projet
+make help           # Aide complète
 ```
 
-## How to Play
+## 🎯 Prochaine Phase : Entités de Base
 
-1. Launch the game:
+### Phase 3 - Entités (Semaine prochaine)
+
+**Objectif** : Premier gameplay fonctionnel
+
+1. **Tours de base** (`srcs/entities/tower.c`)
+   - Placement sur grille
+   - Rotation vers cibles
+   - Tir de projectiles
+   - 4 types : Basic, Sniper, Cannon, Freeze
+
+2. **Ennemis de base** (`srcs/entities/enemy.c`)
+   - Mouvement le long du chemin
+   - Points de vie + barre de santé
+   - 4 types : Basic, Fast, Tank, Flying
+
+3. **Projectiles** (`srcs/entities/projectile.c`)
+   - Trajectoire vers cible
+   - Collision et dégâts
+   - Effets visuels simples
+
+4. **Système de spawn** (`srcs/entities/spawner.c`)
+   - Apparition automatique d'ennemis
+   - Vagues basiques
+
+**Résultat attendu** : Jeu fonctionnel où on peut placer des tours qui tirent sur des ennemis !
+
+## 📊 Statistiques Actuelles
+
+- **Fichiers sources** : 10
+- **Fichiers headers** : 6
+- **Lignes de code** : ~1,500
+- **Fonctions** : ~80 (toutes < 25 lignes)
+- **Structures** : 15+ définies
+- **Constantes** : 100+ configurables
+
+## 🔧 Outils de Développement
+
+### Commandes Make Disponibles
 
 ```bash
-./versus_td
+make                # Build normal
+make debug          # Build avec debug symbols
+make release        # Build optimisé
+make clean          # Nettoyer objets
+make fclean         # Nettoyer tout
+make re             # Rebuild complet
+make run            # Compiler et lancer
+make test           # Test rapide
+make stats          # Statistiques
+make help           # Aide complète
 ```
 
-2. Game Controls:
-   - Click on tower buttons in the toolbar to select a tower
-   - Click on the grid to place the selected tower
-   - Press `ESC` to cancel tower placement
-   - Press `SPACE` to spawn enemies (for testing)
-   - Number keys `1`, `2`, `3` to quickly select different tower types
+### Debug et Tests
 
-3. Game Objective:
-   - Prevent enemies from reaching the end of the path
-   - Build towers strategically to maximize damage and efficiency
-   - Manage your resources to build the most effective defense
+- **Logs colorés** : ERROR (rouge), WARN (jaune), INFO (vert)
+- **Validation automatique** : Pointeurs, ranges, strings
+- **FPS counter** : Affiché en mode debug
+- **Memory tracking** : Allocations surveillées
 
-## Code Structure
+## 🎮 Contrôles Actuels
 
-The project follows the 42 School Norm and is organized as follows:
+| Touche | Action |
+|--------|--------|
+| F1 | Toggle debug info |
+| R | Toggle range display |
+| ESC | Pause/Resume |
+| Clic | Interaction (préparé) |
 
-- `includes/`: Header files
-  - `config.h`: Game constants and configuration
-  - `game.h`: Main game functions and structures
-  - `types.h`: Game object type definitions
-  - `utils.h`: Utility functions
+## 📈 Roadmap
 
-- `srcs/`: Source files
-  - `entities.c`: Enemy, tower, and projectile logic
-  - `init.c`: Game initialization functions
-  - `input.c`: User input handling
-  - `main.c`: Main game loop
-  - `render.c`: Rendering functions
-  - `update.c`: Game state update logic
-  - `utils.c`: Utility functions implementation
+### ✅ Phase 1 - Fondations (Terminée)
+- Structure et headers
+- Build system
 
-## Development Notes
+### ✅ Phase 2 - Utilitaires (Terminée)
+- Maths, debug, mémoire
+- SDL et rendu de base
 
-This game follows the 42 School Norm, which includes specific coding standards:
-- Function length limited to 25 lines
-- Maximum 80 columns per line
-- Specific naming conventions
-- Restricted use of certain language features
+### 🔄 Phase 3 - Entités (En cours)
+- Tours, ennemis, projectiles
+- Premier gameplay
 
-## Future Improvements
+### ⏳ Phase 4 - Systèmes Avancés
+- Vagues, effets, UI
+- Polish et équilibrage
 
-- More enemy types with different behaviors
-- Additional tower types with unique abilities
-- Level design with varied path layouts
-- Sound effects and music
-- Player profiles and high scores
-- Wave system with increasing difficulty
+## 💡 Notes de Développement
 
-## Credits
+### Respect de la Norme Jynra
+- ✅ Toutes les fonctions < 25 lignes
+- ✅ Largeur < 80 colonnes
+- ✅ Indentation 4 tabulations
+- ✅ Nommage cohérent
+- ✅ Pas de variables globales
 
-Developed by Jynra.
+### Qualité du Code
+- **Modularité** : Chaque système indépendant
+- **Lisibilité** : Code auto-documenté
+- **Robustesse** : Validation partout
+- **Performance** : Structures optimisées
+
+### Architecture Extensible
+- Ajout de nouveaux types d'entités facile
+- Systèmes découplés
+- Configuration centralisée
+- Debug intégré
+
+---
+
+**Prêt pour la Phase 3 !** 🚀
+
+L'architecture est solide, les fondations sont posées. Il est temps d'ajouter le gameplay !
