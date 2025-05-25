@@ -1,281 +1,301 @@
-# Versus TD Clean - Phase 4 Complete ✅ 🚀
+# Versus TD Clean
 
-## 🎯 État Actuel
+> **Un Tower Defense moderne développé en C avec SDL2**
 
-**Phase 4 TERMINÉE** : Tower Defense **premium** avec expérience commerciale !
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Language](https://img.shields.io/badge/language-C-blue.svg)
+![Standard](https://img.shields.io/badge/standard-Jynra-green.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-### ✅ Ce qui fonctionne parfaitement
+## 🎯 Aperçu
 
-- **Architecture complète** respectant la norme Jynra ✅
-- **Système de build intelligent** avec Makefile équilibré ✅
-- **Gameplay Tower Defense complet** avec toutes les mécaniques ✅
-- **Expérience premium** avec effets visuels et systèmes avancés ✅
+**Versus TD Clean** est un jeu de tower defense développé en C pur, respectant la norme Jynra (dérivée de 42). Le projet propose deux expériences distinctes : une version **stable** pour une expérience de jeu fluide et une version **premium** avec des effets visuels avancés et des fonctionnalités étendues.
 
-## 🎮 Deux Expériences de Jeu
+### ✨ Caractéristiques principales
 
-### 🎯 **Build Stable** (Recommandé pour débuter)
+- **Architecture modulaire** respectant les bonnes pratiques
+- **Deux builds distincts** : stable et premium
+- **4 types de tours** avec caractéristiques uniques
+- **4 types d'ennemis** avec IA comportementale
+- **Système de vagues progressif** avec boss waves
+- **Interface utilisateur professionnelle** avec info-bulles
+- **Effets visuels spectaculaires** (version premium)
+- **Système d'upgrades** pour les tours
+
+## 🚀 Installation rapide
+
+### Prérequis
+
+**Ubuntu/Debian :**
 ```bash
-make
-./versus_td_clean
+sudo apt-get update
+sudo apt-get install libsdl2-dev libsdl2-ttf-dev build-essential
 ```
-**Fonctionnalités :**
-- Gameplay Tower Defense complet et stable
-- 4 types de tours : Basic, Sniper, Cannon, Freeze
-- 4 types d'ennemis : Basic, Fast, Tank, Flying
-- Système de vagues automatique
-- Interface utilisateur fonctionnelle
-- Performance optimisée (60 FPS garanti)
 
-### 🌟 **Build Premium** (Expérience Complète)
+**macOS :**
 ```bash
-make premium
-./versus_td_clean
-```
-**Fonctionnalités Premium :**
-- 🎆 **Effets de particules spectaculaires** : Explosions, fumée, étincelles
-- 🎯 **Physique avancée** : Knockback, dégâts de zone, collisions optimisées
-- 🖥️ **Interface professionnelle** : Info-bulles, barres de progression, HUD complet
-- ⬆️ **Système d'upgrades** : 3 niveaux par tour avec capacités spéciales
-- 👑 **Vagues avancées** : Boss waves, événements spéciaux, vagues thématiques
-
-## 🏗️ Architecture Technique
-
-```
-Versus_TD_Clean/
-├── includes/           # Headers complets (6 fichiers) ✅
-│   ├── config.h       # 200+ constantes configurables
-│   ├── types.h        # Toutes les structures définies
-│   ├── game.h         # Interface principale
-│   ├── entities.h     # Système entités complet
-│   ├── systems.h      # Systèmes de base et avancés
-│   └── utils.h        # Utilitaires mathématiques
-├── srcs/               # Sources complètes ✅
-│   ├── main.c         # Point d'entrée ✅
-│   ├── temp_stubs.c   # Stubs compatibilité ✅
-│   ├── game/          # Logique principale ✅
-│   │   ├── init.c     # Initialisation SDL complète
-│   │   ├── update.c   # Boucle de jeu optimisée
-│   │   ├── render.c   # Système de rendu
-│   │   └── cleanup.c  # Nettoyage mémoire
-│   ├── entities/      # Système entités complet ✅
-│   │   ├── enemy.c    # 4 types ennemis avec IA
-│   │   ├── spawner.c  # Vagues automatiques
-│   │   ├── tower.c    # 4 types tours avec ciblage
-│   │   └── projectile.c # Système projectiles avec effets
-│   ├── systems/       # Systèmes avancés Phase 4 ✅
-│   │   ├── input.c    # Input avec placement tours
-│   │   ├── effects.c  # 🎆 Système de particules
-│   │   ├── physics.c  # 🎯 Physique avancée
-│   │   ├── ui.c       # 🖥️ Interface professionnelle
-│   │   ├── upgrades.c # ⬆️ Amélioration des tours
-│   │   └── waves.c    # 👑 Vagues et boss
-│   └── utils/         # Utilitaires complets ✅
-│       ├── math.c     # Maths + vecteurs
-│       ├── debug.c    # Système debug professionnel
-│       ├── memory.c   # Gestion mémoire sécurisée
-│       └── file.c     # Opérations fichiers
-└── Makefile           # Build system intelligent ✅
-```
-
-## 🚀 Installation et Build
-
-### **Prérequis**
-```bash
-# Ubuntu/Debian
-sudo apt-get install libsdl2-dev libsdl2-ttf-dev
-
-# macOS
 brew install sdl2 sdl2_ttf
-
-# Arch Linux
-sudo pacman -S sdl2 sdl2_ttf
 ```
 
-### **Compilation**
+**Arch Linux :**
 ```bash
-# Build stable (recommandé)
-make clean
+sudo pacman -S sdl2 sdl2_ttf base-devel
+```
+
+### Compilation et lancement
+
+```bash
+# Cloner le projet
+git clone https://github.com/votre-username/versus-td-clean.git
+cd versus-td-clean
+
+# Build stable (recommandé pour débuter)
 make
 ./versus_td_clean
 
 # Build premium (expérience complète)
-make clean
 make premium
 ./versus_td_clean
-
-# Build optimisé pour production
-make release-premium
 ```
 
-## 🎮 Contrôles de Jeu
+## 🎮 Gameplay
 
-### **Contrôles Principaux**
+### Objectif
+Défendez votre base contre des vagues d'ennemis en plaçant stratégiquement des tours le long de leur chemin.
+
+### Contrôles
 - **Clic gauche** : Placer une tour / Sélectionner
-- **Boutons tours** : Basic (20$), Sniper (50$), Cannon (80$), Freeze (40$)
-- **Clic sur tour** : Sélectionner et voir les stats
+- **Clic droit** : Améliorer une tour (version premium)
 - **ESC** : Pause/Resume
+- **F1** : Afficher les informations de debug
+- **R** : Afficher les portées des tours
 
-### **Contrôles Avancés**
-- **F1** : Debug info (FPS, stats, entités)
-- **R** : Afficher toutes les portées des tours
-- **Clic droit sur tour** : Améliorer (Premium uniquement)
+### Tours disponibles
 
-### **Info-bulles Premium**
-- **Survol boutons** : Voir stats détaillées des tours
-- **Tour sélectionnée** : Panneau d'informations complet
+| Tour | Coût | Dégâts | Portée | Cadence | Spécialité |
+|------|------|--------|--------|---------|------------|
+| **Basic** | $20 | 25 | 80 | 1.5/s | Tour polyvalente |
+| **Sniper** | $50 | 80 | 150 | 0.8/s | Longue portée |
+| **Cannon** | $80 | 60 | 100 | 0.6/s | Dégâts explosifs |
+| **Freeze** | $40 | 15 | 90 | 1.2/s | Ralentit les ennemis |
 
-## 📊 Statistiques du Projet
+### Ennemis
 
-### **Métriques Techniques**
-- **Fichiers sources** : 20 implémentés ✅
-- **Fichiers headers** : 6 complets ✅
-- **Lignes de code** : ~4,000 (sources + headers)
-- **Fonctions** : ~200+ (toutes < 25 lignes, norme Jynra)
-- **Structures** : 15+ définies et utilisées
-- **Constantes** : 200+ configurables
+| Type | Vie | Vitesse | Récompense | Particularité |
+|------|-----|---------|------------|---------------|
+| **Basic** | 100 | 30 | $10 | Ennemi standard |
+| **Fast** | 60 | 60 | $15 | Rapide mais fragile |
+| **Tank** | 300 | 15 | $30 | Résistant mais lent |
+| **Flying** | 80 | 45 | $20 | Immunisé aux obstacles |
 
-### **Performance**
-- **FPS stable** : 60 FPS avec 50+ entités (stable)
-- **FPS premium** : 60 FPS avec 200+ particules (premium)
-- **Mémoire** : Gestion optimisée sans fuites
-- **Temps de compilation** : ~3 secondes
+## 🏗️ Architecture technique
 
-## 🎯 Gameplay Complet
+### Structure du projet
 
-### **Mécaniques Core**
-- **Placement de tours** : Clic intelligent sur grille
-- **Ciblage automatique** : Tours visent le plus proche
-- **Collision précise** : Projectiles touchent avec précision
-- **Économie** : Argent gagné/dépensé, coûts équilibrés
-- **Progression** : Vagues de difficulté croissante
-
-### **Système d'Entités**
-- **Tours** : 4 types avec stats uniques et capacités spéciales
-- **Ennemis** : 4 types avec IA, barres de vie, récompenses
-- **Projectiles** : Trajectoire, dégâts, effets visuels
-- **Spawner** : Vagues automatiques avec patterns variés
-
-### **Fonctionnalités Premium**
-- **Effets visuels** : Chaque action a des effets spectaculaires
-- **Interface moderne** : HUD complet, info-bulles, feedback
-- **Système d'upgrades** : 3 niveaux, capacités débloquées
-- **Boss waves** : Événements spéciaux tous les 5 niveaux
-
-## 📈 Phases de Développement
-
-### ✅ **Phase 1 - Fondations** (Terminée)
-- Structure projet et headers
-- Build system de base
-
-### ✅ **Phase 2 - Utilitaires** (Terminée)  
-- Maths, debug, mémoire
-- SDL et rendu de base
-- Système d'input
-
-### ✅ **Phase 3 - Gameplay** (Terminée)
-- **Tours** : 4 types avec placement et ciblage ✅
-- **Ennemis** : 4 types avec IA et pathfinding ✅
-- **Projectiles** : Trajectoire et collision précise ✅
-- **Spawner** : Vagues automatiques progressives ✅
-- **Interface** : Boutons fonctionnels et sélection ✅
-- **Économie** : Système argent/récompenses ✅
-
-### ✅ **Phase 4 - Premium** (TERMINÉE !)
-- **🎆 Effets** : Système de particules complet ✅
-- **🎯 Physique** : Collisions avancées et knockback ✅
-- **🖥️ UI** : Interface professionnelle avec tooltips ✅
-- **⬆️ Upgrades** : Amélioration des tours (3 niveaux) ✅
-- **👑 Vagues** : Boss waves et événements spéciaux ✅
-
-## 🛠️ Commandes Make Disponibles
-
-### **Builds Principaux**
-```bash
-make              # Build stable (recommandé)
-make premium      # Build premium (toutes fonctionnalités)
-make debug        # Build debug avec AddressSanitizer
-make release      # Build optimisé
+```
+Versus_TD_Clean/
+├── includes/           # Headers (6 fichiers)
+│   ├── config.h       # Configuration et constantes
+│   ├── types.h        # Structures de données
+│   ├── game.h         # Interface principale
+│   ├── entities.h     # Système d'entités
+│   ├── systems.h      # Systèmes de jeu
+│   └── utils.h        # Utilitaires
+├── srcs/              # Code source
+│   ├── main.c         # Point d'entrée
+│   ├── temp_stubs.c   # Stubs pour build stable
+│   ├── entities_base.c # Fonctions communes
+│   ├── game/          # Logique principale
+│   ├── entities/      # Tours, ennemis, projectiles
+│   ├── systems/       # Systèmes avancés
+│   └── utils/         # Fonctions utilitaires
+└── Makefile           # Système de build
 ```
 
-### **Tests et Utilitaires**
+### Composants principaux
+
+#### Game Loop
+- **60 FPS** avec delta time précis
+- **Gestion d'événements** SDL2
+- **États de jeu** (menu, jeu, pause, game over)
+
+#### Système d'entités
+- **Tours** : Ciblage automatique, différents types d'attaques
+- **Ennemis** : IA de pathfinding, effets de statut
+- **Projectiles** : Trajectoires précises, collisions
+
+#### Systèmes avancés (Premium)
+- **Effets visuels** : Particules, explosions, fumée
+- **Physique** : Collisions avancées, knockback
+- **Interface** : Info-bulles, barres de progression
+- **Upgrades** : Amélioration des tours (3 niveaux)
+
+## 📊 Versions du jeu
+
+### Version Stable
+**Parfaite pour découvrir le jeu**
+- Gameplay tower defense complet
+- Performance optimisée (60 FPS garanti)
+- Interface fonctionnelle
+- Toutes les mécaniques de base
+
 ```bash
-make test         # Test rapide (5s)
-make run          # Build et lancer
-make clean        # Nettoyer objets
-make fclean       # Nettoyer tout
+make
+./versus_td_clean
+```
+
+### Version Premium
+**Expérience visuelle immersive**
+- 🎆 **Effets de particules** spectaculaires
+- 🎯 **Physique avancée** avec knockback
+- 🖥️ **Interface professionnelle** avec info-bulles
+- ⬆️ **Système d'upgrades** pour les tours
+- 👑 **Boss waves** et événements spéciaux
+
+```bash
+make premium
+./versus_td_clean
+```
+
+## 🛠️ Développement
+
+### Commandes Make
+
+#### Builds principaux
+```bash
+make              # Build stable
+make premium      # Build premium
+make debug        # Build avec debug symbols
+make release      # Build optimisé pour production
+```
+
+#### Tests et utilitaires
+```bash
+make test         # Test automatique (5 secondes)
+make run          # Build et lancer immédiatement
+make clean        # Nettoyer les fichiers objets
+make fclean       # Nettoyage complet
+make re           # Rebuild complet
+```
+
+#### Informations
+```bash
+make status       # État du projet
+make features     # Liste des fonctionnalités premium
 make help         # Aide complète
 ```
 
-### **Informations**
-```bash
-make status       # État du projet
-make features     # Fonctionnalités Phase 4
-make stats        # Statistiques complètes
-make check        # Vérifier intégrité des fichiers
-```
+### Standards de code
 
-## 🎯 Guide de Mise à Jour vers Premium
+Le projet respecte la **norme Jynra** :
+- Fonctions limitées à 25 lignes maximum
+- Largeur de ligne de 80 colonnes
+- Indentation avec tabulations (4 espaces)
+- Nommage cohérent et descriptif
+- Gestion d'erreurs systématique
 
-Si vous voulez activer l'expérience premium complète :
+### Ajout de fonctionnalités
 
-1. **Créer les fichiers Phase 4** :
-```bash
-touch srcs/systems/effects.c
-touch srcs/systems/physics.c
-touch srcs/systems/ui.c
-touch srcs/systems/upgrades.c
-touch srcs/systems/waves.c
-```
+Pour étendre le jeu :
 
-2. **Copier le contenu des systèmes avancés** (voir artifacts fournis)
+1. **Nouveau type de tour** :
+   - Ajouter les constantes dans `config.h`
+   - Étendre `tower_set_stats()` dans `tower.c`
+   - Mettre à jour l'interface dans `ui.c`
 
-3. **Compiler et profiter** :
-```bash
-make premium
-./versus_td_clean
-```
+2. **Nouveau type d'ennemi** :
+   - Définir les stats dans `config.h`
+   - Implémenter le comportement dans `enemy.c`
+   - Ajouter dans la génération de vagues
 
-## 🏆 Accomplissements
+3. **Nouvel effet visuel** :
+   - Créer la fonction dans `effects.c`
+   - Ajouter les appels aux moments appropriés
+   - Configurer les paramètres de particules
 
-### **🎮 Gameplay**
-- ✅ **Tower Defense complet** et addictif
-- ✅ **4 types de tours** équilibrés avec capacités uniques
-- ✅ **4 types d'ennemis** avec IA et comportements variés
-- ✅ **Système de vagues** progressif et challengeant
-- ✅ **Interface intuitive** avec feedback immédiat
+## 📈 Performance
 
-### **💻 Technique**
-- ✅ **Architecture modulaire** extensible et maintenable
-- ✅ **Norme Jynra respectée** (100% des fonctions < 25 lignes)
-- ✅ **Performance optimisée** (60 FPS constant)
-- ✅ **Gestion mémoire parfaite** (aucune fuite détectée)
-- ✅ **Build system intelligent** avec compilation progressive
+### Métriques optimisées
+- **60 FPS constants** avec 50+ entités actives
+- **Gestion mémoire** sans fuites détectées
+- **Rendu optimisé** avec culling automatique
+- **Temps de compilation** : ~3 secondes
 
-### **🌟 Premium**
-- ✅ **Effets visuels spectaculaires** à chaque action
-- ✅ **Interface professionnelle** digne d'un jeu commercial
-- ✅ **Système de progression** satisfaisant avec upgrades
-- ✅ **Contenu avancé** avec boss waves et événements
+### Monitoring intégré
+- Compteurs FPS en temps réel
+- Statistiques d'entités actives
+- Profiling mémoire basique
+- Mode debug avec informations détaillées
 
-## 🎊 Conclusion
+## 🎯 Stratégies de jeu
 
-**Versus TD Clean Phase 4** est maintenant un **jeu Tower Defense complet** prêt pour :
+### Conseils pour débutants
+1. **Placez des tours Basic** en début de partie
+2. **Économisez** pour des tours Sniper sur les positions clés
+3. **Utilisez les tours Freeze** pour ralentir les groupes
+4. **Améliorez** vos tours les mieux placées
 
-- ✅ **Jeu immédiat** : Expérience stable et amusante
-- ✅ **Développement** : Architecture extensible pour nouvelles fonctionnalités
-- ✅ **Commercialisation** : Qualité et polish professionnels
-- ✅ **Apprentissage** : Code propre et bien documenté
+### Stratégies avancées
+1. **Cannon towers** près des virages pour maximiser l'explosion
+2. **Combinaisons Freeze + Sniper** pour éliminer les tanks
+3. **Gestion économique** : équilibrez tours et upgrades
+4. **Anticipation** des boss waves (tous les 5 niveaux)
 
-### **🎯 Prêt à Jouer !**
+## 🏆 Statistiques
 
-```bash
-make premium
-./versus_td_clean
-```
+### Métriques du projet
+- **~4000 lignes** de code source
+- **~200 fonctions** respectant la norme
+- **20 fichiers sources** + 6 headers
+- **15+ structures** de données
+- **200+ constantes** configurables
 
-**Défendez votre base contre les vagues d'ennemis avec des effets visuels spectaculaires ! 🎆🎯**
+### Records de gameplay
+Le jeu suit automatiquement :
+- Score maximum atteint
+- Vague la plus haute
+- Nombre d'ennemis éliminés
+- Argent total gagné
+- Temps de jeu
+
+## 🤝 Contribution
+
+### Comment contribuer
+1. **Fork** le projet
+2. **Créez** une branche pour votre fonctionnalité
+3. **Respectez** la norme Jynra
+4. **Testez** avec `make test`
+5. **Soumettez** une pull request
+
+### Zones d'amélioration
+- [ ] Nouveaux types de tours/ennemis
+- [ ] Système de sauvegarde
+- [ ] Éditeur de niveaux
+- [ ] Multijoueur local
+- [ ] Achievements/succès
+
+## 📝 Changelog
+
+### Version 1.0.0 (Actuelle)
+- ✅ Gameplay tower defense complet
+- ✅ Architecture modulaire stable
+- ✅ Système d'effets visuels
+- ✅ Interface utilisateur avancée
+- ✅ Système d'upgrades
+- ✅ Boss waves et événements spéciaux
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 🙏 Remerciements
+
+- **SDL2** pour le framework graphique
+- **École 42** pour l'inspiration de la norme
+- **Communauté open source** pour les outils utilisés
 
 ---
 
-**Projet développé avec ❤️ selon la norme Jynra**  
-**De zéro à jeu commercial en 4 phases** 🚀
+**Développé avec ❤️ en respectant les standards de qualité professionnels**
+
+*Prêt à défendre votre base ? Lancez le jeu et montrez vos talents de stratège !* 🎮🏰
