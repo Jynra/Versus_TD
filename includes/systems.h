@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 18:11:41 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 21:32:18 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,20 @@ float	physics_distance(t_vector2 a, t_vector2 b);
 t_vector2	physics_normalize(t_vector2 vec);
 t_vector2	physics_rotate(t_vector2 vec, float angle);
 
+/* Advanced Physics Functions - PHASE 4 */
+void	physics_apply_knockback(t_enemy *enemy, t_vector2 source_pos, float force);
+bool	physics_line_circle_collision(t_vector2 line_start, t_vector2 line_end,
+			t_vector2 circle_center, float radius);
+t_vector2	physics_predict_position(t_vector2 current_pos, t_vector2 velocity,
+			float time);
+t_vector2	physics_calculate_intercept(t_vector2 shooter_pos, t_vector2 target_pos,
+			t_vector2 target_vel, float projectile_speed);
+bool	physics_is_path_clear(t_game *game, t_vector2 start, t_vector2 end);
+void	physics_create_shockwave(t_game *game, t_vector2 center, float radius,
+			float force);
+float	physics_calculate_damage_falloff(float distance, float max_range,
+			int base_damage);
+
 /* Wave System */
 void	waves_init(t_wave *wave);
 void	waves_update(t_wave *wave, t_game *game);
@@ -45,6 +59,11 @@ bool	waves_is_complete(t_wave *wave, t_game *game);
 bool	waves_all_enemies_dead(t_game *game);
 void	waves_calculate_spawn_data(t_wave *wave);
 int		waves_get_enemy_type_for_wave(int wave_number, int spawn_index);
+
+/* Advanced Wave Functions - PHASE 4 */
+bool	waves_should_show_warning(t_wave *wave);
+float	waves_get_difficulty_multiplier(int wave_number);
+void	waves_apply_difficulty_scaling(t_game *game, int wave_number);
 
 /* Effects System */
 void	effects_init(t_game *game);
@@ -56,6 +75,9 @@ void	effects_create_smoke(t_game *game, t_vector2 pos);
 void	effects_create_sparks(t_game *game, t_vector2 pos, int count);
 int		effects_find_free_particle(t_game *game);
 void	effects_cleanup_particles(t_game *game);
+
+/* Advanced Effects Functions - PHASE 4 */
+void	effects_create_freeze_aura(t_game *game, t_vector2 pos, float radius);
 
 /* UI System */
 void	ui_init(t_game *game);
@@ -83,6 +105,14 @@ bool	upgrades_tower(t_game *game, int tower_id);
 int		upgrades_get_cost(t_tower *tower);
 void	upgrades_apply_stats(t_tower *tower);
 bool	upgrades_can_afford(t_game *game, t_tower *tower);
+
+/* Advanced Upgrade Functions - PHASE 4 */
+bool	upgrades_handle_tower_click(t_game *game, t_tower *tower);
+void	upgrades_get_tower_info(t_tower *tower, char *info_text, size_t max_len);
+float	upgrades_get_damage_multiplier(int level);
+float	upgrades_get_range_multiplier(int level);
+float	upgrades_get_rate_multiplier(int level);
+bool	upgrades_is_special_ability_unlocked(t_tower *tower);
 
 /* Render System */
 void	render_init(t_game *game);

@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 12:36:37 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 21:32:06 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ typedef struct s_entity
 	float		rotation;
 }	t_entity;
 
-/* Tower Structure */
+/* Tower Structure - ENHANCED FOR PHASE 4 */
 typedef struct s_tower
 {
 	t_entity	base;
@@ -70,6 +70,8 @@ typedef struct s_tower
 	int			total_damage_dealt;
 	bool		selected;
 	int			upgrade_cost;
+	bool		explosive;          /* NEW: For cannon upgrades */
+	float		explosion_radius;   /* NEW: For explosion range */
 }	t_tower;
 
 /* Enemy Structure */
@@ -87,7 +89,7 @@ typedef struct s_enemy
 	float		spawn_time;
 }	t_enemy;
 
-/* Projectile Structure */
+/* Projectile Structure - ENHANCED FOR PHASE 4 */
 typedef struct s_projectile
 {
 	t_entity	base;
@@ -95,7 +97,7 @@ typedef struct s_projectile
 	int			target_id;
 	float		lifetime;
 	bool		piercing;
-	bool		explosive;
+	bool		explosive;          /* FIXED: Explicit explosive flag */
 	float		explosion_radius;
 }	t_projectile;
 
@@ -199,7 +201,7 @@ typedef struct s_grid_cell
 	float		movement_cost;
 }	t_grid_cell;
 
-/* Main Game Structure */
+/* Main Game Structure - ENHANCED FOR PHASE 4 */
 typedef struct s_game
 {
 	/* SDL Components */
@@ -248,11 +250,11 @@ typedef struct s_game
 	bool			show_ranges;
 	bool			show_debug;
 
-	/* Performance Counters */
+	/* Performance Counters - ENHANCED FOR PHASE 4 */
 	int				active_towers;
 	int				active_enemies;
 	int				active_projectiles;
-	int				active_particles;
+	int				active_particles;    /* ADDED: Track active particles */
 	float			fps;
 	int				frame_count;
 	float			fps_timer;
