@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 12:29:02 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 17:42:11 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,11 @@ void	projectile_render(t_projectile *projectile, t_game *game);
 bool	projectile_hit_target(t_projectile *projectile, t_enemy *enemy);
 void	projectile_explode(t_projectile *projectile, t_game *game);
 void	projectile_destroy(t_projectile *projectile);
+
+/* Spawner Functions - Phase 3 NEW */
+void	spawner_update(t_game *game);
+void	spawner_force_next_wave(t_game *game);
+int		spawner_get_enemies_remaining(t_game *game);
 
 /* Entity Management Functions */
 int		entities_find_free_tower(t_game *game);

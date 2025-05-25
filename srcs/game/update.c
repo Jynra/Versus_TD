@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 13:28:45 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 18:12:25 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	game_handle_events(t_game *game)
 			game->running = false;
 			break ;
 		}
-		input_handle_event(&game->input, &event);
+		input_handle_event(&game->input, &event, game);
 		if (event.type == SDL_KEYDOWN)
 		{
 			if (event.key.keysym.sym == SDLK_ESCAPE)

@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 12:29:17 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 18:11:41 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 /* Input System */
 void	input_init(t_input *input);
 void	input_update(t_input *input);
-void	input_handle_event(t_input *input, SDL_Event *event);
+void	input_handle_event(t_input *input, SDL_Event *event, t_game *game);
 bool	input_is_key_pressed(t_input *input, int scancode);
 bool	input_is_key_down(t_input *input, int scancode);
 bool	input_mouse_clicked(t_input *input, int button);
