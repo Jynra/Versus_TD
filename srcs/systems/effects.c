@@ -14,23 +14,12 @@
 #include "utils.h"
 #include "game.h"
 
+/* Forward declarations */
 static void	particle_init(t_particle *particle);
 static void	particle_update(t_particle *particle, float delta_time);
 static void	particle_render(t_particle *particle, t_game *game);
 static void	create_particle(t_game *game, t_vector2 pos, t_vector2 vel,
-				t_particle_config config);
-
-typedef struct s_particle_config
-{
-	int			type;
-	t_color		start_color;
-	t_color		end_color;
-	float		start_size;
-	float		end_size;
-	float		lifetime;
-	float		gravity;
-	bool		fade_out;
-}	t_particle_config;
+				int type, t_color color, float lifetime);
 
 void	effects_init(t_game *game)
 {
@@ -86,24 +75,18 @@ void	effects_render(t_game *game)
 
 void	effects_create_explosion(t_game *game, t_vector2 pos, int intensity)
 {
-	t_particle_config	config;
-	t_vector2			particle_vel;
-	int					particle_count;
-	int					i;
-	float				angle;
-	float				speed;
+	t_vector2	particle_vel;
+	int			particle_count;
+	int			i;
+	float		angle;
+	float		speed;
+	t_color		explosion_color;
 
 	if (!validate_pointer(game))
 		return ;
 	particle_count = math_clamp_int(intensity * 3, 5, 20);
-	config.type = PARTICLE_EXPLOSION;
-	config.start_color = color_create(255, 200, 100, 255);
-	config.end_color = color_create(255, 50, 0, 0);
-	config.start_size = PARTICLE_SIZE_MAX;
-	config.end_size = PARTICLE_SIZE_MIN;
-	config.lifetime = random_float(PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX);
-	config.gravity = 20.0f;
-	config.fade_out = true;
+	explosion_color = color_create(255, 200, 100, 255);
+	
 	i = 0;
 	while (i < particle_count)
 	{
@@ -111,7 +94,8 @@ void	effects_create_explosion(t_game *game, t_vector2 pos, int intensity)
 		speed = random_float(PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX);
 		particle_vel.x = cosf(angle) * speed;
 		particle_vel.y = sinf(angle) * speed;
-		create_particle(game, pos, particle_vel, config);
+		create_particle(game, pos, particle_vel, PARTICLE_EXPLOSION, 
+			explosion_color, random_float(PARTICLE_LIFETIME_MIN, PARTICLE_LIFETIME_MAX));
 		i++;
 	}
 	debug_log("Explosion created: %d particles at (%.1f, %.1f)", 
@@ -120,24 +104,18 @@ void	effects_create_explosion(t_game *game, t_vector2 pos, int intensity)
 
 void	effects_create_blood(t_game *game, t_vector2 pos)
 {
-	t_particle_config	config;
-	t_vector2			particle_vel;
-	int					particle_count;
-	int					i;
-	float				angle;
-	float				speed;
+	t_vector2	particle_vel;
+	int			particle_count;
+	int			i;
+	float		angle;
+	float		speed;
+	t_color		blood_color;
 
 	if (!validate_pointer(game))
 		return ;
 	particle_count = random_int(3, 8);
-	config.type = PARTICLE_BLOOD;
-	config.start_color = color_create(255, 0, 0, 255);
-	config.end_color = color_create(150, 0, 0, 0);
-	config.start_size = 3.0f;
-	config.end_size = 1.0f;
-	config.lifetime = random_float(0.5f, 1.5f);
-	config.gravity = 50.0f;
-	config.fade_out = true;
+	blood_color = color_create(255, 0, 0, 255);
+	
 	i = 0;
 	while (i < particle_count)
 	{
@@ -145,58 +123,48 @@ void	effects_create_blood(t_game *game, t_vector2 pos)
 		speed = random_float(30.0f, 80.0f);
 		particle_vel.x = cosf(angle) * speed;
 		particle_vel.y = sinf(angle) * speed;
-		create_particle(game, pos, particle_vel, config);
+		create_particle(game, pos, particle_vel, PARTICLE_BLOOD, 
+			blood_color, random_float(0.5f, 1.5f));
 		i++;
 	}
 }
 
 void	effects_create_smoke(t_game *game, t_vector2 pos)
 {
-	t_particle_config	config;
-	t_vector2			particle_vel;
-	int					particle_count;
-	int					i;
+	t_vector2	particle_vel;
+	int			particle_count;
+	int			i;
+	t_color		smoke_color;
 
 	if (!validate_pointer(game))
 		return ;
 	particle_count = random_int(2, 5);
-	config.type = PARTICLE_SMOKE;
-	config.start_color = color_create(200, 200, 200, 150);
-	config.end_color = color_create(100, 100, 100, 0);
-	config.start_size = 2.0f;
-	config.end_size = 8.0f;
-	config.lifetime = random_float(1.0f, 2.5f);
-	config.gravity = -10.0f;
-	config.fade_out = true;
+	smoke_color = color_create(200, 200, 200, 150);
+	
 	i = 0;
 	while (i < particle_count)
 	{
 		particle_vel.x = random_float(-20.0f, 20.0f);
 		particle_vel.y = random_float(-30.0f, -10.0f);
-		create_particle(game, pos, particle_vel, config);
+		create_particle(game, pos, particle_vel, PARTICLE_SMOKE, 
+			smoke_color, random_float(1.0f, 2.5f));
 		i++;
 	}
 }
 
 void	effects_create_sparks(t_game *game, t_vector2 pos, int count)
 {
-	t_particle_config	config;
-	t_vector2			particle_vel;
-	int					i;
-	float				angle;
-	float				speed;
+	t_vector2	particle_vel;
+	int			i;
+	float		angle;
+	float		speed;
+	t_color		spark_color;
 
 	if (!validate_pointer(game))
 		return ;
 	count = math_clamp_int(count, 1, 15);
-	config.type = PARTICLE_SPARK;
-	config.start_color = color_create(255, 255, 150, 255);
-	config.end_color = color_create(255, 100, 0, 0);
-	config.start_size = 2.0f;
-	config.end_size = 0.5f;
-	config.lifetime = random_float(0.3f, 1.0f);
-	config.gravity = 30.0f;
-	config.fade_out = true;
+	spark_color = color_create(255, 255, 150, 255);
+	
 	i = 0;
 	while (i < count)
 	{
@@ -204,33 +172,28 @@ void	effects_create_sparks(t_game *game, t_vector2 pos, int count)
 		speed = random_float(40.0f, 120.0f);
 		particle_vel.x = cosf(angle) * speed;
 		particle_vel.y = sinf(angle) * speed;
-		create_particle(game, pos, particle_vel, config);
+		create_particle(game, pos, particle_vel, PARTICLE_SPARK, 
+			spark_color, random_float(0.3f, 1.0f));
 		i++;
 	}
 }
 
 void	effects_create_freeze_aura(t_game *game, t_vector2 pos, float radius)
 {
-	t_particle_config	config;
-	t_vector2			particle_pos;
-	t_vector2			particle_vel;
-	int					particle_count;
-	int					i;
-	float				angle;
-	float				distance;
+	t_vector2	particle_pos;
+	t_vector2	particle_vel;
+	int			particle_count;
+	int			i;
+	float		angle;
+	float		distance;
+	t_color		freeze_color;
 
 	if (!validate_pointer(game))
 		return ;
 	particle_count = (int)(radius * 0.3f);
 	particle_count = math_clamp_int(particle_count, 5, 25);
-	config.type = PARTICLE_SPARK;
-	config.start_color = color_create(150, 200, 255, 200);
-	config.end_color = color_create(100, 150, 255, 0);
-	config.start_size = 1.5f;
-	config.end_size = 3.0f;
-	config.lifetime = random_float(0.8f, 1.5f);
-	config.gravity = -5.0f;
-	config.fade_out = true;
+	freeze_color = color_create(150, 200, 255, 200);
+	
 	i = 0;
 	while (i < particle_count)
 	{
@@ -240,7 +203,8 @@ void	effects_create_freeze_aura(t_game *game, t_vector2 pos, float radius)
 		particle_pos.y = pos.y + sinf(angle) * distance;
 		particle_vel.x = random_float(-10.0f, 10.0f);
 		particle_vel.y = random_float(-20.0f, -5.0f);
-		create_particle(game, particle_pos, particle_vel, config);
+		create_particle(game, particle_pos, particle_vel, PARTICLE_SPARK, 
+			freeze_color, random_float(0.8f, 1.5f));
 		i++;
 	}
 }
@@ -339,7 +303,7 @@ static void	particle_render(t_particle *particle, t_game *game)
 }
 
 static void	create_particle(t_game *game, t_vector2 pos, t_vector2 vel,
-		t_particle_config config)
+		int type, t_color color, float lifetime)
 {
 	int			particle_id;
 	t_particle	*particle;
@@ -350,13 +314,13 @@ static void	create_particle(t_game *game, t_vector2 pos, t_vector2 vel,
 	particle = &game->particles[particle_id];
 	particle->pos = pos;
 	particle->vel = vel;
-	particle->life = config.lifetime;
-	particle->max_life = config.lifetime;
-	particle->size = config.start_size;
-	particle->start_size = config.start_size;
-	particle->color = config.start_color;
-	particle->start_color = config.start_color;
-	particle->type = config.type;
-	particle->gravity = config.gravity;
+	particle->life = lifetime;
+	particle->max_life = lifetime;
+	particle->size = random_float(PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX);
+	particle->start_size = particle->size;
+	particle->color = color;
+	particle->start_color = color;
+	particle->type = type;
+	particle->gravity = 20.0f;
 	particle->active = true;
 }
