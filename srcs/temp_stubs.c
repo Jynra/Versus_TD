@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 18:29:25 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 20:03:43 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -276,6 +276,48 @@ void	deselect_all_towers(t_game *game)
 		i++;
 	}
 	game->selected_tower_id = -1;
+}
+
+/* ========================================================================== */
+/* EFFECTS SYSTEM STUBS - For stable build compatibility                     */
+/* ========================================================================== */
+
+void	effects_create_explosion(t_game *game, t_vector2 pos, int intensity)
+{
+	(void)game;
+	(void)pos;
+	(void)intensity;
+	/* Stub - no visual effects in stable build */
+}
+
+void	effects_create_blood(t_game *game, t_vector2 pos)
+{
+	(void)game;
+	(void)pos;
+	/* Stub - no visual effects in stable build */
+}
+
+void	effects_create_smoke(t_game *game, t_vector2 pos)
+{
+	(void)game;
+	(void)pos;
+	/* Stub - no visual effects in stable build */
+}
+
+void	effects_create_sparks(t_game *game, t_vector2 pos, int count)
+{
+	(void)game;
+	(void)pos;
+	(void)count;
+	/* Stub - no visual effects in stable build */
+}
+
+void	effects_create_freeze_aura(t_game *game, t_vector2 pos, float radius)
+{
+	(void)game;
+	(void)pos;
+	(void)radius;
+	/* Stub - no visual effects in stable build */
 }
 
 /* ========================================================================== */

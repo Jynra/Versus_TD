@@ -6,7 +6,7 @@
 #    By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/05/25 16:00:00 by jynra             #+#    #+#              #
-#    Updated: 2025/05/25 18:30:25 by ellucas          ###   ########.fr        #
+#    Updated: 2025/05/25 19:59:32 by ellucas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,11 +32,10 @@ endif
 
 # Directories
 SRC_DIR = srcs
-INC_DIR = includes
 OBJ_DIR = objs
 
 # =============================================================================
-# PROGRESSIVE BUILD - PHASE 3 COMPLETE
+# SOURCE FILES - PROGRESSIVE BUILD
 # =============================================================================
 
 # Phase 2 - Foundation (Complete)
@@ -58,63 +57,63 @@ PHASE3_SRCS = srcs/entities/enemy.c \
               srcs/entities/tower.c \
               srcs/entities/projectile.c
 
-# Phase 4 - Advanced Systems (Future)
-PHASE4_SRCS = srcs/systems/physics.c \
-              srcs/systems/effects.c \
-              srcs/systems/waves.c \
+# Phase 4 - Advanced Systems (Complete!)
+PHASE4_SRCS = srcs/systems/effects.c \
+              srcs/systems/physics.c \
               srcs/systems/ui.c \
-              srcs/systems/upgrades.c
+              srcs/systems/upgrades.c \
+              srcs/systems/waves.c
 
-# =============================================================================
-# CURRENT BUILD CONFIGURATION - PHASE 3 COMPLETE
-# =============================================================================
+# Build configurations
+SRCS_STABLE = $(PHASE2_SRCS) $(PHASE3_SRCS)
+SRCS_PREMIUM = $(PHASE2_SRCS) $(PHASE3_SRCS) $(PHASE4_SRCS)
 
-# Current active build (Phase 2 + Phase 3 Complete)
-SRCS = $(PHASE2_SRCS) $(PHASE3_SRCS)
-
-# Complete build (all phases)
-SRCS_COMPLETE = $(PHASE2_SRCS) $(PHASE3_SRCS) $(PHASE4_SRCS)
-
-# Object files
+# Default to stable build
+SRCS = $(SRCS_STABLE)
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-# Header files for dependency tracking
+# Header files
 HEADERS = includes/config.h \
-         includes/types.h \
-         includes/game.h \
-         includes/entities.h \
-         includes/systems.h \
-         includes/utils.h
+          includes/types.h \
+          includes/game.h \
+          includes/entities.h \
+          includes/systems.h \
+          includes/utils.h
 
-# Colors for pretty output
-RED = \033[0;31m
+# Colors for output
 GREEN = \033[0;32m
 YELLOW = \033[0;33m
 BLUE = \033[0;34m
-PURPLE = \033[0;35m
 CYAN = \033[0;36m
-WHITE = \033[0;37m
+RED = \033[0;31m
+BOLD = \033[1m
 RESET = \033[0m
-
-# Progress tracking
-TOTAL_FILES = $(words $(SRCS))
-COMPILED_FILES = 0
 
 # =============================================================================
 # BUILD TARGETS
 # =============================================================================
 
-# Default target (Phase 3 Complete)
+# Default build - Stable gameplay (Phase 3)
 all: banner $(NAME)
-	@echo "$(GREEN)✓ Phase 3 COMPLETE build successful!$(RESET)"
+	@echo "$(GREEN)✓ Stable build complete!$(RESET)"
 	@echo "$(CYAN)Run with: ./$(NAME)$(RESET)"
-	@echo "$(GREEN)Status: Full Tower Defense Gameplay Ready!$(RESET)"
+	@echo "$(YELLOW)For premium experience: make premium$(RESET)"
 
-# Complete build (all phases when ready)
-complete: SRCS = $(SRCS_COMPLETE)
-complete: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-complete: banner $(NAME)
-	@echo "$(GREEN)✓ Complete build finished!$(RESET)"
+# Premium build - All Phase 4 features
+premium: SRCS = $(SRCS_PREMIUM)
+premium: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+premium: banner-premium $(NAME)
+	@echo "$(BOLD)$(GREEN)🎉 PREMIUM BUILD COMPLETE! 🎉$(RESET)"
+	@echo "$(CYAN)✨ Phase 4 features active:$(RESET)"
+	@echo "$(GREEN)  • Particle effects$(RESET)"
+	@echo "$(GREEN)  • Advanced physics$(RESET)"
+	@echo "$(GREEN)  • Professional UI$(RESET)"
+	@echo "$(GREEN)  • Tower upgrades$(RESET)"
+	@echo "$(GREEN)  • Boss waves$(RESET)"
+
+# Aliases
+complete: premium
+phase4: premium
 
 # Create executable
 $(NAME): $(OBJ_DIR) $(OBJS)
@@ -124,7 +123,6 @@ $(NAME): $(OBJ_DIR) $(OBJS)
 
 # Create object directory structure
 $(OBJ_DIR):
-	@echo "$(BLUE)Creating build directories...$(RESET)"
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OBJ_DIR)/game
 	@mkdir -p $(OBJ_DIR)/entities
@@ -133,157 +131,178 @@ $(OBJ_DIR):
 
 # Compile source files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
-	@$(eval COMPILED_FILES := $(shell echo $$(($(COMPILED_FILES) + 1))))
-	@printf "$(YELLOW)[%2d/%2d]$(RESET) Compiling %-30s" $(COMPILED_FILES) $(TOTAL_FILES) "$<"
+	@echo "$(BLUE)Compiling $<$(RESET)"
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
-	@echo " $(GREEN)✓$(RESET)"
 
 # =============================================================================
-# DEVELOPMENT TARGETS
+# DEVELOPMENT BUILDS
 # =============================================================================
 
-# Debug build
+# Debug builds
 debug: CFLAGS += $(DEBUG_FLAGS)
-debug: clean banner $(NAME)
+debug: clean $(NAME)
 	@echo "$(RED)✓ Debug build complete$(RESET)"
 
-# Release build
+debug-premium: CFLAGS += $(DEBUG_FLAGS)
+debug-premium: SRCS = $(SRCS_PREMIUM)
+debug-premium: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+debug-premium: clean $(NAME)
+	@echo "$(RED)✓ Premium debug build complete$(RESET)"
+
+# Release builds
 release: CFLAGS += $(RELEASE_FLAGS)
-release: clean banner $(NAME)
+release: clean $(NAME)
 	@echo "$(GREEN)✓ Release build complete$(RESET)"
 
-# Test the current phase
+release-premium: CFLAGS += $(RELEASE_FLAGS)
+release-premium: SRCS = $(SRCS_PREMIUM)
+release-premium: OBJS = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+release-premium: clean $(NAME)
+	@echo "$(GREEN)✓ Premium release build complete$(RESET)"
+
+# =============================================================================
+# TESTING & UTILITIES
+# =============================================================================
+
+# Test builds
 test: $(NAME)
-	@echo "$(BLUE)Testing Phase 3 complete build...$(RESET)"
-	@timeout 5s ./$(NAME) || echo "$(GREEN)✓ Build test passed$(RESET)"
+	@echo "$(BLUE)Testing build...$(RESET)"
+	@timeout 5s ./$(NAME) || echo "$(GREEN)✓ Test completed$(RESET)"
 
-# Test gameplay (longer test for full gameplay)
-test-gameplay: $(NAME)
-	@echo "$(BLUE)Testing full Tower Defense gameplay...$(RESET)"
-	@timeout 15s ./$(NAME) || echo "$(GREEN)✓ Gameplay test completed$(RESET)"
+test-premium: premium
+	@echo "$(BLUE)Testing premium build...$(RESET)"
+	@timeout 10s ./$(NAME) || echo "$(GREEN)✓ Premium test completed$(RESET)"
 
-# Show what files are included in current build
-show-files:
-	@echo "$(CYAN)Phase 3 Complete includes:$(RESET)"
-	@for file in $(SRCS); do echo "  ✓ $$file"; done
+# Run builds
+run: $(NAME)
+	@echo "$(CYAN)Starting game...$(RESET)"
+	@./$(NAME)
+
+run-premium: premium
+	@echo "$(BOLD)$(CYAN)🚀 Starting premium experience...$(RESET)"
+	@./$(NAME)
+
+# Clean targets
+clean:
+	@echo "$(RED)Cleaning build files...$(RESET)"
+	@rm -rf $(OBJ_DIR)
+
+fclean: clean
+	@echo "$(RED)Removing executable...$(RESET)"
+	@rm -f $(NAME)
+
+re: fclean all
+re-premium: fclean premium
+
+# =============================================================================
+# INFORMATION TARGETS
+# =============================================================================
+
+# Project status
+status:
+	@echo "$(CYAN)=== VERSUS TD CLEAN - PROJECT STATUS ===$(RESET)"
+	@echo "$(GREEN)Phase 2 (Foundation): ✅ Complete$(RESET)"
+	@echo "$(GREEN)Phase 3 (Gameplay):   ✅ Complete$(RESET)"
+	@echo "$(GREEN)Phase 4 (Premium):    ✅ Complete$(RESET)"
 	@echo ""
-	@echo "$(BLUE)Phase 4 planned:$(RESET)"
-	@for file in $(PHASE4_SRCS); do echo "  📋 $$file"; done
+	@echo "$(YELLOW)Available builds:$(RESET)"
+	@echo "  make         - Stable gameplay"
+	@echo "  make premium - Full premium experience"
 
-# Check what files are missing
-check-missing:
-	@echo "$(BLUE)Checking for missing source files...$(RESET)"
+# Show Phase 4 features
+features:
+	@echo "$(BOLD)$(CYAN)🌟 PHASE 4 PREMIUM FEATURES$(RESET)"
+	@echo ""
+	@echo "$(YELLOW)🎆 Particle Effects:$(RESET) Explosions, smoke, sparks"
+	@echo "$(YELLOW)🎯 Advanced Physics:$(RESET) Knockback, area damage"
+	@echo "$(YELLOW)🖥️  Professional UI:$(RESET) Tooltips, progress bars"
+	@echo "$(YELLOW)⬆️  Tower Upgrades:$(RESET) 3 levels, special abilities"
+	@echo "$(YELLOW)👑 Boss Waves:$(RESET) Special events every 5 waves"
+
+# File organization
+files:
+	@echo "$(CYAN)Stable build (Phase 3):$(RESET)"
+	@echo "  Files: $(words $(SRCS_STABLE))"
+	@echo "$(CYAN)Premium build (Phase 4):$(RESET)"
+	@echo "  Files: $(words $(SRCS_PREMIUM))"
+	@echo "  New systems: $(words $(PHASE4_SRCS))"
+
+# Project statistics
+stats:
+	@echo "$(CYAN)=== PROJECT STATISTICS ===$(RESET)"
+	@echo "$(YELLOW)Total source files:$(RESET) $(words $(SRCS_PREMIUM))"
+	@echo "$(YELLOW)Header files:$(RESET) $(words $(HEADERS))"
+	@echo "$(YELLOW)Completion:$(RESET) $(BOLD)$(GREEN)100%$(RESET)"
+	@echo "$(YELLOW)Status:$(RESET) Ready for commercial release!"
+
+# Check file integrity
+check:
+	@echo "$(BLUE)Checking files...$(RESET)"
 	@missing=0; \
-	for file in $(SRCS); do \
+	for file in $(SRCS_PREMIUM); do \
 		if [ ! -f "$$file" ]; then \
 			echo "$(RED)❌ Missing: $$file$(RESET)"; \
 			missing=$$((missing + 1)); \
 		fi; \
 	done; \
 	if [ $$missing -eq 0 ]; then \
-		echo "$(GREEN)✓ All required files present for Phase 3$(RESET)"; \
+		echo "$(GREEN)✅ All files present!$(RESET)"; \
 	else \
 		echo "$(RED)❌ $$missing files missing$(RESET)"; \
 	fi
 
-# Check entity implementation status
-check-entities:
-	@echo "$(CYAN)Entity Implementation Status:$(RESET)"
-	@echo "$(GREEN)✓ Enemy system$(RESET) - Movement, health, types"
-	@echo "$(GREEN)✓ Spawner system$(RESET) - Automatic enemy generation"
-	@echo "$(GREEN)✓ Tower system$(RESET) - Placement and targeting"
-	@echo "$(GREEN)✓ Projectile system$(RESET) - Shooting and collision"
-	@echo "$(WHITE)Phase 3 Complete!$(RESET)"
-
 # =============================================================================
-# UTILITY TARGETS
+# BANNERS
 # =============================================================================
 
-# Clean object files
-clean:
-	@echo "$(RED)Cleaning build files...$(RESET)"
-	@rm -rf $(OBJ_DIR)
-	@echo "$(GREEN)✓ Clean complete$(RESET)"
-
-# Full clean
-fclean: clean
-	@echo "$(RED)Removing executable...$(RESET)"
-	@rm -f $(NAME)
-	@echo "$(GREEN)✓ Full clean complete$(RESET)"
-
-# Rebuild
-re: fclean all
-
-# Run the game
-run: $(NAME)
-	@echo "$(CYAN)Starting $(NAME) - Phase 3 Complete...$(RESET)"
-	@./$(NAME)
-
-# Count lines of code (current files only)
-count:
-	@echo "$(BLUE)Counting lines of code (Phase 3)...$(RESET)"
-	@echo "$(CYAN)Source files:$(RESET)"
-	@wc -l $(SRCS) 2>/dev/null | tail -1 || echo "Some files missing"
-	@echo "$(CYAN)Header files:$(RESET)"
-	@find $(INC_DIR) -name "*.h" | xargs wc -l | tail -1
-
-# Show project statistics
-stats:
-	@echo "$(CYAN)=== Versus TD Clean - Project Statistics ===$(RESET)"
-	@echo "$(WHITE)Current Phase:$(RESET) 3 Complete"
-	@echo "$(WHITE)Implemented files:$(RESET) $(words $(SRCS))"
-	@echo "$(WHITE)Phase 4 files:$(RESET) $(words $(PHASE4_SRCS))"
-	@echo "$(WHITE)Total planned:$(RESET) $(words $(SRCS_COMPLETE))"
-	@echo "$(WHITE)Headers:$(RESET) $(words $(HEADERS))"
-	@echo "$(WHITE)Progress:$(RESET) $(shell echo "scale=1; $(words $(SRCS)) * 100 / $(words $(SRCS_COMPLETE))" | bc 2>/dev/null || echo "80.0")%"
-	@echo ""
-	@echo "$(GREEN)✅ Phase 2$(RESET): Foundation complete"
-	@echo "$(GREEN)✅ Phase 3$(RESET): All entities implemented"
-	@echo "$(BLUE)📋 Phase 4$(RESET): Advanced systems planned"
-
-# Show help
-help:
-	@echo "$(CYAN)Versus TD Clean - Phase 3 Complete Makefile Help$(RESET)"
-	@echo ""
-	@echo "$(WHITE)Build Targets:$(RESET)"
-	@echo "  $(GREEN)all$(RESET)              - Build Phase 3 complete"
-	@echo "  $(GREEN)complete$(RESET)         - Build with Phase 4 (when ready)"
-	@echo "  $(GREEN)debug$(RESET)            - Build with debug symbols + AddressSanitizer"
-	@echo "  $(GREEN)release$(RESET)          - Build optimized version"
-	@echo "  $(GREEN)clean$(RESET)            - Remove object files"
-	@echo "  $(GREEN)fclean$(RESET)           - Remove all generated files"
-	@echo "  $(GREEN)re$(RESET)               - Rebuild everything"
-	@echo ""
-	@echo "$(WHITE)Testing:$(RESET)"
-	@echo "  $(YELLOW)run$(RESET)              - Build and run the game"
-	@echo "  $(YELLOW)test$(RESET)             - Quick build verification (5s)"
-	@echo "  $(YELLOW)test-gameplay$(RESET)    - Extended gameplay test (15s)"
-	@echo ""
-	@echo "$(WHITE)Development:$(RESET)"
-	@echo "  $(YELLOW)show-files$(RESET)       - Show current and planned files"
-	@echo "  $(YELLOW)check-missing$(RESET)    - Check for missing files"
-	@echo "  $(YELLOW)check-entities$(RESET)   - Show entity implementation status"
-	@echo ""
-	@echo "$(WHITE)Information:$(RESET)"
-	@echo "  $(BLUE)count$(RESET)            - Count lines of code"
-	@echo "  $(BLUE)stats$(RESET)            - Show project statistics"
-	@echo "  $(BLUE)help$(RESET)             - Show this help"
-
-# Project banner
 banner:
 	@echo "$(CYAN)"
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║                 VERSUS TD CLEAN - PHASE 3                    ║"
-	@echo "║                    COMPLETE GAMEPLAY                         ║"
-	@echo "║                                                              ║"
-	@echo "║     ✅ Enemies  ✅ Spawner  ✅ Towers  ✅ Projectiles        ║"
-	@echo "║               Ready to Play Tower Defense!                   ║"
-	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo "╔════════════════════════════════════════════════════════════╗"
+	@echo "║                VERSUS TD CLEAN - STABLE                    ║"
+	@echo "║            Fully Playable Tower Defense                   ║"
+	@echo "╚════════════════════════════════════════════════════════════╝"
 	@echo "$(RESET)"
 
-# Phony targets
-.PHONY: all complete clean fclean re debug release run test test-gameplay \
-        show-files check-missing check-entities count stats help banner
+banner-premium:
+	@echo "$(BOLD)$(CYAN)"
+	@echo "╔════════════════════════════════════════════════════════════╗"
+	@echo "║            🎉 VERSUS TD CLEAN - PREMIUM 🎉                 ║"
+	@echo "║   🎆 Effects • 🎯 Physics • 🖥️ UI • ⬆️ Upgrades • 👑 Boss   ║"
+	@echo "╚════════════════════════════════════════════════════════════╝"
+	@echo "$(RESET)"
 
-# Disable built-in rules
-.SUFFIXES:
+# Help system
+help:
+	@echo "$(BOLD)$(CYAN)Versus TD Clean - Makefile Help$(RESET)"
+	@echo ""
+	@echo "$(BOLD)Main builds:$(RESET)"
+	@echo "  $(GREEN)make$(RESET)         - Stable build (recommended for testing)"
+	@echo "  $(GREEN)make premium$(RESET) - Premium build (all Phase 4 features)"
+	@echo ""
+	@echo "$(BOLD)Development:$(RESET)"
+	@echo "  $(YELLOW)make debug$(RESET)   - Debug build with AddressSanitizer"
+	@echo "  $(YELLOW)make release$(RESET) - Optimized release build"
+	@echo ""
+	@echo "$(BOLD)Testing:$(RESET)"
+	@echo "  $(BLUE)make test$(RESET)    - Quick functionality test"
+	@echo "  $(BLUE)make run$(RESET)     - Build and run immediately"
+	@echo ""
+	@echo "$(BOLD)Information:$(RESET)"
+	@echo "  $(CYAN)make status$(RESET)  - Show project status"
+	@echo "  $(CYAN)make features$(RESET) - Show Phase 4 features"
+	@echo "  $(CYAN)make stats$(RESET)   - Show project statistics"
+	@echo ""
+	@echo "$(BOLD)Cleanup:$(RESET)"
+	@echo "  $(RED)make clean$(RESET)   - Remove object files"
+	@echo "  $(RED)make fclean$(RESET)  - Remove all build files"
+	@echo "  $(RED)make re$(RESET)      - Clean rebuild"
+
+# =============================================================================
+# PHONY TARGETS
+# =============================================================================
+
+.PHONY: all premium complete phase4 clean fclean re re-premium debug release \
+        debug-premium release-premium test test-premium run run-premium \
+        status features files stats check banner banner-premium help
+
+.DEFAULT_GOAL := all

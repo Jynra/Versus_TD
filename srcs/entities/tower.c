@@ -6,7 +6,7 @@
 /*   By: ellucas <ellucas@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:00:00 by jynra             #+#    #+#             */
-/*   Updated: 2025/05/25 17:56:54 by ellucas          ###   ########.fr       */
+/*   Updated: 2025/05/25 20:02:22 by ellucas          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ static void	tower_update_targeting(t_tower *tower, t_game *game);
 static void	tower_update_firing(t_tower *tower, t_game *game);
 static void	tower_render_base(t_tower *tower, t_game *game);
 static void	tower_render_cannon(t_tower *tower, t_game *game);
+static void	tower_create_firing_effects(t_tower *tower, t_game *game);
 
 void	tower_init(t_tower *tower)
 {
@@ -144,6 +145,7 @@ void	tower_fire(t_tower *tower, t_game *game)
 	cannon_offset.x = cosf(tower->base.rotation) * tower->base.radius;
 	cannon_offset.y = sinf(tower->base.rotation) * tower->base.radius;
 	projectile_pos = vec2_add(tower->base.pos, cannon_offset);
+	tower_create_firing_effects(tower, game);
 	if (tower->base.type == TOWER_FREEZE)
 	{
 		enemy_apply_slow(target, TOWER_FREEZE_DURATION, 
@@ -159,6 +161,34 @@ void	tower_fire(t_tower *tower, t_game *game)
 		{
 			debug_log("Tower fired projectile: damage=%d", tower->damage);
 		}
+	}
+}
+
+static void	tower_create_firing_effects(t_tower *tower, t_game *game)
+{
+	t_vector2	muzzle_pos;
+	t_vector2	cannon_offset;
+
+	cannon_offset.x = cosf(tower->base.rotation) * (tower->base.radius + 8.0f);
+	cannon_offset.y = sinf(tower->base.rotation) * (tower->base.radius + 8.0f);
+	muzzle_pos = vec2_add(tower->base.pos, cannon_offset);
+	if (tower->base.type == TOWER_BASIC)
+	{
+		effects_create_sparks(game, muzzle_pos, 3);
+		effects_create_smoke(game, muzzle_pos);
+	}
+	else if (tower->base.type == TOWER_SNIPER)
+	{
+		effects_create_sparks(game, muzzle_pos, 8);
+		effects_create_explosion(game, muzzle_pos, 1);
+		effects_create_smoke(game, muzzle_pos);
+	}
+	else if (tower->base.type == TOWER_CANNON)
+	{
+		effects_create_explosion(game, muzzle_pos, 3);
+		effects_create_sparks(game, muzzle_pos, 12);
+		effects_create_smoke(game, muzzle_pos);
+		effects_create_smoke(game, muzzle_pos);
 	}
 }
 
@@ -225,6 +255,7 @@ static void	tower_render_base(t_tower *tower, t_game *game)
 {
 	t_color	base_color;
 	t_color	outline_color;
+	t_color	glow_color;
 
 	if (tower->base.type == TOWER_BASIC)
 		base_color = color_create(100, 100, 100, 255);
@@ -238,9 +269,24 @@ static void	tower_render_base(t_tower *tower, t_game *game)
 		base_color = color_gray();
 	outline_color = color_black();
 	if (tower->selected)
+	{
 		outline_color = color_create(255, 255, 0, 255);
+		glow_color = color_create(255, 255, 0, 100);
+		render_circle(game, tower->base.pos, tower->base.radius + 4, glow_color);
+	}
 	render_circle(game, tower->base.pos, tower->base.radius + 2, outline_color);
 	render_circle(game, tower->base.pos, tower->base.radius, base_color);
+	if (tower->level > 1)
+	{
+		t_color level_color = color_create(255, 215, 0, 255);
+		int i = 0;
+		while (i < tower->level - 1)
+		{
+			render_circle(game, vec2_create(tower->base.pos.x - 8 + i * 4, 
+				tower->base.pos.y - tower->base.radius - 6), 2, level_color);
+			i++;
+		}
+	}
 }
 
 static void	tower_render_cannon(t_tower *tower, t_game *game)
@@ -260,6 +306,11 @@ static void	tower_render_cannon(t_tower *tower, t_game *game)
 	{
 		cannon_length = tower->base.radius + 6.0f;
 		cannon_color = color_create(60, 60, 60, 255);
+	}
+	else if (tower->base.type == TOWER_FREEZE)
+	{
+		cannon_length = tower->base.radius + 5.0f;
+		cannon_color = color_create(150, 200, 255, 255);
 	}
 	else
 	{
